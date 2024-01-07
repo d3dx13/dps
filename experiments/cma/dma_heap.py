@@ -120,16 +120,9 @@ class DmaHeap:
 
         allocFd = UniqueFD(alloc.fd)
 
-        """
         ret = fcntl.ioctl(allocFd.get(), DMA_BUF_SET_NAME, name)
         if not isinstance(ret, bytes) and ret < 0:
             _log.error(f"dmaHeap naming failure for {name}")
             return UniqueFD()
-        """
 
-        return allocFd
-
-    def connect(self, pid, fd) -> UniqueFD:
-        fd = open(f"/proc/{pid}/fd/{fd}", "r").fileno()
-        allocFd = UniqueFD(fd)
         return allocFd

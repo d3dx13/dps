@@ -8,7 +8,7 @@ dmaHeap = DmaHeap()
 
 frame_size = 1024 * 1024 * 1024
 
-fd_connected = dmaHeap.connect(22071, 4)
+fd_connected = dmaHeap.connect(32467, 4)
 memory_connected = mmap.mmap(fd_connected.get(), frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
 arr_connected = np.ndarray(shape=(1024, 1024, 1024), dtype=np.uint8, buffer=memory_connected)
 
