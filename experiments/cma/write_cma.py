@@ -13,11 +13,11 @@ import socket
 
 dmaHeap = DmaHeap()
 
-frame_size = 1024 * 1024
+frame_size = 1024 * 1024 * 128
 
 fd = dmaHeap.alloc(f"test", frame_size)
 memory = mmap.mmap(fd.get(), frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
-arr = np.ndarray(shape=(1024, 1024), dtype=np.uint8, buffer=memory)
+arr = np.ndarray(shape=(1024, 1024, 128), dtype=np.uint8, buffer=memory)
 
 path = "/dev/shm/sender_fd"
 sender = socket.socket(socket.AF_UNIX)
@@ -43,7 +43,13 @@ while True:
     update_cma_fd()
 
     val = int(time.monotonic()) % 256
-    rand_arr = np.random.randint(val, val + 1, size=(1024, 1024), dtype=np.uint8)
-    to = time.monotonic_ns()
+    rand_arr = np.random.randint(val, val + 1, size=(1024, 1024, 128), dtype=np.uint8)
+
+    t_start = time.monotonic_ns()
     arr[:] = rand_arr[:]
-    # print(f"{frame_size / (time.monotonic_ns() - to):.6f} Gb pub / sec")
+    t_end = time.monotonic_ns()
+    freq = np.prod(arr.shape) * arr.dtype.itemsize / (t_end - t_start)
+
+    print()
+    print(np.mean(arr))
+    print(f" freq = {freq:.6f} Gb pub / sec")

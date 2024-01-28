@@ -8,7 +8,7 @@ import time
 import socket
 import ctypes
 
-SIZE = (1600, 1300, 3)
+SIZE = (1024, 128)
 
 
 def pub_array(fd, affinity):
@@ -61,7 +61,7 @@ if __name__ == '__main__':
         frame_size *= r
 
     start_affinity = 0
-    N = 3
+    N = 2
 
     fd = [dmaHeap.alloc(f"test", frame_size) for i in range(N)]
     pub_p = [multiprocessing.Process(target=pub_array, args=(fd[i], [(start_affinity + i * 2) % 32, ])) for i in

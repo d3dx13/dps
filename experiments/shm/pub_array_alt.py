@@ -6,7 +6,7 @@ import time
 if __name__ == '__main__':
     os.sched_setaffinity(0, [4, ])
 
-    tensor = np.float32(np.random.random(size=(1024, 1024)))
+    tensor = np.float32(np.random.random(size=(1024, 128)))
 
     shm_data = shared_memory.SharedMemory(name="test_alt", create=True, size=np.prod(tensor.shape) * tensor.dtype.itemsize)
     pub_array = np.ndarray(shape=tensor.shape, dtype=tensor.dtype, buffer=shm_data.buf)

@@ -5,9 +5,9 @@ import os
 import time
 
 if __name__ == '__main__':
-    os.sched_setaffinity(0, [7, ])
+    os.sched_setaffinity(0, [2, ])
 
-    tensor = np.float32(np.random.random(size=(1024, 1024)))
+    tensor = np.float32(np.random.random(size=(1024, 128)))
 
     shm_data = shared_memory.SharedMemory(name="test", size=np.prod(tensor.shape) * tensor.dtype.itemsize)
     unregister("/test", 'shared_memory')

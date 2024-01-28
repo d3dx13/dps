@@ -4,9 +4,9 @@ import os
 import time
 
 if __name__ == '__main__':
-    os.sched_setaffinity(0, [5, ])
+    os.sched_setaffinity(0, [0, ])
 
-    tensor = np.float32(np.random.random(size=(1024, 1024)))
+    tensor = np.float32(np.random.random(size=(1024, 128)))
 
     shm_data = shared_memory.SharedMemory(name="test", create=True, size=np.prod(tensor.shape) * tensor.dtype.itemsize)
     pub_array = np.ndarray(shape=tensor.shape, dtype=tensor.dtype, buffer=shm_data.buf)
