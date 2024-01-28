@@ -9,7 +9,7 @@ import ctypes
 def pub_array(data, affinity):
     os.sched_setaffinity(0, affinity)
 
-    data_tensor = np.float32(np.random.random(size=(1024, 1024)))
+    data_tensor = np.float32(np.random.random(size=(1024, 1024, 1024)))
 
     data_array = np.ndarray(data_tensor.shape, dtype=np.float32, buffer=data.get_obj())
 
@@ -25,7 +25,7 @@ def pub_array(data, affinity):
 def sub_array(data, affinity):
     os.sched_setaffinity(0, affinity)
 
-    data_tensor = np.float32(np.random.random(size=(1024, 1024)))
+    data_tensor = np.float32(np.random.random(size=(1024, 1024, 1024)))
 
     data_array = np.ndarray(data_tensor.shape, dtype=np.float32, buffer=data.get_obj())
 
@@ -39,7 +39,7 @@ def sub_array(data, affinity):
 
 
 if __name__ == '__main__':
-    tensor = np.float32(np.random.random(size=(1024, 1024)))
+    tensor = np.float32(np.random.random(size=(1024, 1024, 1024)))
 
     pub_1_array = sharedctypes.Array(ctypes.c_float, int(np.prod(tensor.shape)))
     pub_2_array = sharedctypes.Array(ctypes.c_float, int(np.prod(tensor.shape)))
@@ -51,10 +51,10 @@ if __name__ == '__main__':
     sub_1_p.start()
 
     pub_2_p = multiprocessing.Process(target=pub_array, args=(pub_2_array, [6, ]))
-    # pub_2_p.start()
+    pub_2_p.start()
 
     sub_2_p = multiprocessing.Process(target=sub_array, args=(pub_2_array, [7, ]))
-    # sub_2_p.start()
+    sub_2_p.start()
 
     # pub_1_p.join()
     # sub_1_p.join()
