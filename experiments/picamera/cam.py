@@ -7,11 +7,11 @@ from picamera2.outputs import FileOutput
 picam2 = Picamera2()
 picam2.start_preview(Preview.QT)
 
-preview_config = picam2.create_video_configuration(main={"size": (1280, 720), "format": "BGR888"},
-                                                   lores={"size": (320, 240), "format": "YUV420"})
-print(preview_config)
-encoder = H264Encoder(1000000)
+preview_config = picam2.create_video_configuration(main={"size": (640, 360), "format": "BGR888"})
+preview_config['raw']['size'] = (3840, 2160)
 preview_config['queue'] = False
+
+print(preview_config)
 # preview_config['main']['size'] = (648, 486)
 # preview_config['main']['size'] = (640, 480)
 
@@ -25,11 +25,12 @@ preview_config['queue'] = False
 picam2.configure(preview_config)
 
 picam2.start()
+
 picam2.set_controls({"AfMode": 2})
 
-time.sleep(10)
+time.sleep(5)
 
-picam2.set_controls({"ScalerCrop": (9152 // 2 - 320, 6944 // 2 - 240, 640, 480)})
+picam2.set_controls({"ScalerCrop": (9152 // 2 - 320, 6944 // 2 - 180, 640, 360)})
 # picam2.set_controls({"ScalerCrop": (2592 // 2 - 648 // 2, 1944 // 2 - 486 // 2, 648, 486)})
 
 time.sleep(1e9)
