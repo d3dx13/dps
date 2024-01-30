@@ -7,9 +7,9 @@ from v4l2 import _IOW, _IOWR
 
 _log = logging.getLogger("dma_heap")
 heapNames = [
+    "/dev/dma_heap/reserved",
     "/dev/dma_heap/linux,cma",
-    "/dev/dma_heap/vidbuf_cached",
-    "/dev/dma_heap/reserved"
+    "/dev/dma_heap/vidbuf_cached"
 ]
 
 

@@ -33,10 +33,10 @@ tup = socket.recv_fds(sock, 1024, 2)
 fdList = tup[1]
 print("fdList", fdList)
 
-frame_size = 1024 * 1024 * 128
+frame_size = 1024 * 1024 * 512
 memory = mmap.mmap(fdList[0], frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
-arr = np.ndarray(shape=(1024, 1024, 128), dtype=np.uint8, buffer=memory)
-local_arr = np.ndarray(shape=(1024, 1024, 128), dtype=np.uint8)
+arr = np.ndarray(shape=(1024, 1024, 512), dtype=np.uint8, buffer=memory)
+local_arr = np.ndarray(shape=(1024, 1024, 512), dtype=np.uint8)
 
 while True:
     t_start = time.monotonic_ns()
