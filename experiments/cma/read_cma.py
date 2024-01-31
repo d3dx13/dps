@@ -6,6 +6,10 @@ import numpy as np
 import devmem
 import os, errno
 import socket
+import sys
+sys.path.append("../cpp_python/build/lib.linux-aarch64-cpython-311")
+
+import answer
 
 print(os.getpid())
 
@@ -19,22 +23,12 @@ def silentremove(filename):
 
 
 # dmaHeap = DmaHeap()
-
-path = "/dev/shm/sender_fd"
-sender = socket.socket(socket.AF_UNIX)
-silentremove(path)
-sender.bind(path)
-sender.listen()
-
-sock, addr = sender.accept()
-print("sock, addr", sock, addr)
-
-tup = socket.recv_fds(sock, 1024, 2)
-fdList = tup[1]
-print("fdList", fdList)
+pub_pid = 3281
+pub_fd = 4
+target_fd = answer.get_answer()
 
 frame_size = 1024 * 1024 * 512
-memory = mmap.mmap(fdList[0], frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
+memory = mmap.mmap(target_fd, frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
 arr = np.ndarray(shape=(1024, 1024, 512), dtype=np.uint8, buffer=memory)
 local_arr = np.ndarray(shape=(1024, 1024, 512), dtype=np.uint8)
 

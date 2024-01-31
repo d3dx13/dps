@@ -28,32 +28,10 @@ fd = dmaHeap.alloc(f"test", frame_size)
 memory = mmap.mmap(fd.get(), frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
 arr = np.ndarray(shape=(1024, 1024, 512), dtype=np.uint8, buffer=memory)
 
-path_fd = f"/proc/{os.getpid()}/fd/{fd.get()}"
-path = "/dev/shm/sender_fd"
-# silentremove(path)
-# os.link(src=path_fd, dst=path)
-sender = socket.socket(socket.AF_UNIX)
-
-
-def update_cma_fd():
-    try:
-        sender.connect(path)
-        msg_a = "hi"
-        msgb = bytes(msg_a, 'ascii')
-        desList = [fd.get(), ]
-        socket.send_fds(sender, [msgb], desList, 2, None)
-        # print(dir(socket))
-    except:
-        pass
-
-
-print(fd.get())
 print(os.getpid())
+print(fd.get())
 
 while True:
-    # msg = sock.recv()
-    update_cma_fd()
-
     val = int(time.monotonic()) % 256
     rand_arr = np.random.randint(val, val + 1, size=(1024, 1024, 512), dtype=np.uint8)
 
