@@ -1,8 +1,13 @@
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <bitset>
 #include <climits>
+#include <vector>
 #include <type_traits>
+#include <variant>
+#include <cstring>
+#include <any>
 
 struct message {
     std::uint16_t *a;
@@ -14,57 +19,51 @@ struct message {
 #define IS_INTEGRAL(T) typename std::enable_if< std::is_integral<T>::value >::type* = 0
 
 template<class T>
-std::string integral_to_binary_string(T byte, IS_INTEGRAL(T))
-{
+std::string integral_to_binary_string(T byte, IS_INTEGRAL(T)) {
     std::bitset<sizeof(T) * CHAR_BIT> bs(byte);
     return bs.to_string();
 }
 
+std::unordered_map<std::string, std::any> generate_map(
+        std::vector<std::vector<std::string>> info,
+        unsigned char * buffer,
+        unsigned long offset
+        ) {
+    std::unordered_map<std::string, std::any> result;
+    for (std::vector<std::string> &field: info) {
+        result[field.at(1)] = new (buffer + offset) std::uint8_t[1];
+    }
+    return result;
+}
+
 int main() {
-    char buffer[32];
-    for (char ch: buffer) {
-        std::cout << "ch: " << (int) ch << "\n";
+    unsigned char buffer [32] = {0};
+
+    std::vector<std::vector<std::string>> info;
+    std::vector<std::string> tmp;
+    tmp.emplace_back("uint8"); // type
+    tmp.emplace_back("a"); // name
+    tmp.emplace_back("4,6"); // shape
+    info.push_back(tmp);
+    auto gen_map = generate_map(info, buffer, 0);
+
+    for (auto ch: buffer) {
+        std::cout << "ch : " << (unsigned int) ch << "\n";
+    }
+    for (auto value: gen_map) {
+        auto casted = std::any_cast<std::uint8_t*>(value.second);
+        std::cout << value.first << " : " << (unsigned int) casted[0] << "\n";
     }
     std::cout << "\n";
 
-    // std::uint8_t &b = *std::any_cast<std::uint8_t>(&umap["i8"]);
+    gen_map["a"] = 42;
 
-    //for (auto &it: umap) {
-    //    std::cout << it.first << " : " << std::get<std::uint8_t>(it.second) << "\n";
-    //}
-
-    message msg{};
-    msg.a = new(buffer + 0) std::uint16_t[2];
-    msg.b = new(buffer + 8) std::uint32_t[2];
-    msg.image = new(buffer + 16) std::uint8_t[2];
-
-    // auto *pA = static_cast<message *>(static_cast<void *>(&buffer[2]));
-
-    std::cout << "a 0 = " << msg.a[0] << "\n";
-    std::cout << "b 0 = " << msg.b[0] << "\n";
-    std::cout << "a 1 = " << msg.a[1] << "\n";
-    std::cout << "b 1 = " << msg.b[1] << "\n";
-    std::cout << "bt 0 = " << (unsigned int) msg.image[0] << "\n";
-    std::cout << "bt 1 = " << (unsigned int) msg.image[1] << "\n";
-    std::cout << "size: " << sizeof(message) << "\n";
-    for (char ch: buffer) {
-        std::cout << "ch: " << integral_to_binary_string(ch) << "\n";
+    for (auto ch: buffer) {
+        std::cout << "ch : " << (unsigned int) ch << "\n";
     }
-    std::cout << "\n";
-
-    msg.a[0] = 12312;
-    msg.a[1] = 2222;
-    msg.b[0] = 1312312312;
-    msg.b[1] = 222322223;
-    std::cout << "a 0 = " << msg.a[0] << "\n";
-    std::cout << "b 0 = " << msg.b[0] << "\n";
-    std::cout << "a 1 = " << msg.a[1] << "\n";
-    std::cout << "b 1 = " << msg.b[1] << "\n";
-    std::cout << "bt 0 = " << (unsigned int) msg.image[0] << "\n";
-    std::cout << "bt 1 = " << (unsigned int) msg.image[1] << "\n";
-    std::cout << "size: " << sizeof(message) << "\n";
-    for (char ch: buffer) {
-        std::cout << "ch: " << integral_to_binary_string(ch) << "\n";
+    for (auto value: gen_map) {
+        auto casted = std::any_cast<std::uint8_t>(value.second);
+        std::cout << value.first << " : " << (unsigned int) casted << "\n";
     }
     std::cout << "\n";
 
