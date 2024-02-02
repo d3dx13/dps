@@ -6,16 +6,23 @@ import devmem
 import os, errno
 import socket
 import sys
+
+sys.path.append("../cma")
 sys.path.append("build/lib.linux-aarch64-cpython-311")
 
+import dma_heap
 import dma_cma
 
 print(os.getpid())
 
-# dmaHeap = DmaHeap()
-pub_pid = 2774
+dmaHeap = dma_heap.DmaHeap()
+pub_pid = 2884
 pub_fd = 4
+pub_sync_fd = 5
 target_fd = dma_cma.borrow_fd_from_pid(pub_pid, pub_fd)
+sync_fd = dma_cma.borrow_fd_from_pid(pub_pid, pub_fd)
+
+sync_file = dmaHeap.connect(sync_fd)
 
 frame_size = 1024 * 1024 * 512
 memory = mmap.mmap(target_fd, frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
