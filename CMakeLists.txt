@@ -8,6 +8,9 @@ project(
         LANGUAGES CXX
 )
 
+set(MSG_INCLUDE_DIRS "${IPS_SOURCE_DIR}/msg")
+include_directories( ${MSG_INCLUDE_DIRS} )
+
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
