@@ -37,8 +37,8 @@ protected:
     };
 
     bool is_dma_heap_valid(std::string);
-    int dmabuf_heap_open(std::string);
-    int borrow_fd_from_pid(pid_t, int);
+    static int dmabuf_heap_open(const std::string&);
+    static int borrow_fd_from_pid(pid_t, int);
 
     int shm_open();
 
