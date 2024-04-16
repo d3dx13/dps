@@ -24,3 +24,6 @@ add_subdirectory(apps)
 
 # Python library is here
 # add_subdirectory(python)
+
+add_library(libcamera SHARED IMPORTED)
+add_dependencies(libcamera libcamera_source)

@@ -16,7 +16,7 @@ import dma_cma
 print(os.getpid())
 
 dmaHeap = dma_heap.DmaHeap()
-pub_pid = 2884
+pub_pid = 6638
 pub_fd = 4
 pub_sync_fd = 5
 target_fd = dma_cma.borrow_fd_from_pid(pub_pid, pub_fd)

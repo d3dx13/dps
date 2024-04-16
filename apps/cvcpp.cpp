@@ -1,31 +1,33 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <chrono>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <sys/mman.h>
 
-const int width = 2000;
-const int height = 4000;
-double array[width][height];
+using namespace cv;
 
-double fRand(double fMin, double fMax) {
-    double f = (double) rand() / RAND_MAX;
-    return fMin + f * (fMax - fMin);
+int borrow_fd_from_pid(int pid, int fd)
+{
+    int pid_fd = syscall(SYS_pidfd_open, pid, 0);   // PIDFD_NONBLOCK
+    return syscall(SYS_pidfd_getfd, pid_fd, fd, 0); // PTRACE_MODE_ATTACH_REALCREDS
 }
 
-int main() {
-    for (auto &y: array) {
-        for (auto &x: y) {
-            x = fRand(0.0, 1.0);
-        }
+int main()
+{
+    int pub_pid = 7740;
+    int pub_fd = 44;
+    int target_fd = borrow_fd_from_pid(pub_pid, pub_fd);
+
+    int frame_size = 320 * 240 * 3;
+    unsigned char* dataBuffer = static_cast<unsigned char*>(mmap(NULL, frame_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, target_fd, 0u));
+    Mat image(Size(320, 240), CV_8UC3, dataBuffer);
+
+    while (true)
+    {
+        cv::imshow("array", image);
+        cv::waitKey(1);
     }
-    auto start = std::chrono::high_resolution_clock::now();
-
-    cv::Mat A(width, height, CV_64F, array);
-
-    auto finish = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
-
-    cv::imshow("array", A);
-    cv::waitKey(0);
 
     return 0;
 }
