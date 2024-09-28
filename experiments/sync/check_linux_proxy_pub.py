@@ -13,19 +13,19 @@ import datetime
 print("\nStart")
 os.system("cat /proc/meminfo | grep Cma")
 
-frame_size = 1024 * 1024 * 128 * 128
+frame_size = 1024 * 1024 * 128
 
 print("PID:", os.getpid())
 
 dmaHeap = DmaHeap()
 
-fd = dmaHeap.alloc(f"test", frame_size)
-print("fd", fd.get())
+fd = dmaHeap.alloc(f"testing_name", frame_size)
+print("fd", fd)
 
 print("\nAlloc")
 os.system("cat /proc/meminfo | grep Cma")
 
-memory = mmap.mmap(fd.get(), frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
+memory = mmap.mmap(fd, frame_size, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
 
 print("\nmmap")
 os.system("cat /proc/meminfo | grep Cma")

@@ -93,7 +93,7 @@ class DmaHeap:
     """DmaHeap"""
 
     def __init__(self):
-        self.__dmaHeapHandle = UniqueFD()
+        self.__dmaHeapHandle = -1
         for name in heapNames:
             try:
                 print(f"Opening {name} | {os.O_CLOEXEC | os.O_RDWR}")
@@ -104,40 +104,35 @@ class DmaHeap:
                 _log.info(f"Failed to open {name}")
                 continue
 
-            self.__dmaHeapHandle = UniqueFD(self.dmaHeap_fd)
+            self.__dmaHeapHandle = self.dmaHeap_fd
             break
 
-        if not self.__dmaHeapHandle.isValid():
+        if not self.__dmaHeapHandle >= 0:
             raise RuntimeError("Could not open any dmaHeap device")
 
-    @property
-    def isValid(self):
-        return self.__dmaHeapHandle.isValid()
-
-    def alloc(self, name, size) -> UniqueFD:
+    def alloc(self, name, size) -> int:
         alloc = dma_heap_allocation_data()
         alloc.len = size
         alloc.fd_flags = os.O_CLOEXEC | os.O_RDWR
-        ret = fcntl.ioctl(self.__dmaHeapHandle.get(), DMA_HEAP_IOCTL_ALLOC, alloc)
+        ret = fcntl.ioctl(self.__dmaHeapHandle, DMA_HEAP_IOCTL_ALLOC, alloc)
         if ret < 0:
             _log.error(f"dmaHeap allocation failure for {name}")
-            return UniqueFD()
+            return -1
 
-        allocFd = UniqueFD(alloc.fd)
+        allocFd = alloc.fd
         print(f"alloc.fd {alloc.fd}")
-        print(f"allocFd.get() {allocFd.get()}")
 
-        ret = fcntl.ioctl(allocFd.get(), DMA_BUF_SET_NAME, name)
+        ret = fcntl.ioctl(allocFd, DMA_BUF_SET_NAME, name)
         if not isinstance(ret, bytes) and ret < 0:
             _log.error(f"dmaHeap naming failure for {name}")
-            return UniqueFD()
+            return -1
 
         sync_file = dma_buf_export_sync_file()
         sync_file.flags = DMA_BUF_SYNC_READ | DMA_BUF_SYNC_WRITE
-        ret = fcntl.ioctl(allocFd.get(), DMA_BUF_IOCTL_EXPORT_SYNC_FILE, sync_file)
+        ret = fcntl.ioctl(allocFd, DMA_BUF_IOCTL_EXPORT_SYNC_FILE, sync_file)
         if not isinstance(ret, bytes) and ret < 0:
             _log.error(f"dmaHeap export sync file failure for {name}")
-            return UniqueFD()
+            return -1
 
         print("sync_file fd", sync_file.fd)
 
