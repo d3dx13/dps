@@ -5,7 +5,7 @@ sys.path.append("/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.li
 import linux_proxy
 import os
 from time import sleep
-import mmap
+import select
 
 print("PID:", os.getpid())
 
@@ -13,8 +13,12 @@ pid_input = int(input("Enter PID: "))
 fd_input = int(input("Enter fd: "))
 
 fd = linux_proxy.borrow_fd_from_pid(pid_input, fd_input)
-memory = mmap.mmap(fd, 1024 * 1024 * 128, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE)
+print("borrow_fd_from_pid:", fd)
+
+event = select.epoll(sizehint=-1, flags=0)
+event.register(fd=fd, eventmask=select.EPOLLIN | select.EPOLLET)
 
 while True:
-    print(fd, memory[:20])
-    sleep(1.0)
+    events = event.poll()
+    print(events)
+    # sleep(1.0)

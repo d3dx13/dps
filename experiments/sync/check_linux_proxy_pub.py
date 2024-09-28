@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-aarch64-cpython-311")
+sys.path.append("/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-x86_64-cpython-310")
 
 import linux_proxy
 import os
@@ -13,7 +13,7 @@ import datetime
 print("\nStart")
 os.system("cat /proc/meminfo | grep Cma")
 
-frame_size = 1024 * 1024 * 128
+frame_size = 1024 * 1024 * 128 * 128
 
 print("PID:", os.getpid())
 
@@ -32,5 +32,6 @@ os.system("cat /proc/meminfo | grep Cma")
 
 while True:
     date_time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S").encode()
+    print(date_time)
     memory[:len(date_time)] = date_time
-    sleep(0.01)
+    sleep(1.0)
