@@ -17,6 +17,8 @@ frame_size = 1024 * 1024 * 128
 
 print("PID:", os.getpid())
 
+input("Press Key")
+
 dmaHeap = DmaHeap()
 
 fd = dmaHeap.alloc(f"testing_name", frame_size)

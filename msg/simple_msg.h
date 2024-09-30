@@ -14,3 +14,12 @@ struct simple_msg {
     mode mm;
     byte name[8];
 }; // compressed
+
+struct simple_msg_dynamic {
+    uint16 a;
+    uint32 b;
+    uint8 image;
+    float32 fv;
+    mode mm;
+    byte *name;
+}; // compressed
