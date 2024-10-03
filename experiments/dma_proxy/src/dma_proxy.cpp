@@ -1,5 +1,5 @@
 #ifndef INCLUDE_HEADER
-#include "linux_proxy.h"
+#include "dma_proxy.h"
 #endif
 
 int borrow_fd_from_pid(int pid, int fd){

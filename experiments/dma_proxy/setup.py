@@ -1,6 +1,7 @@
 from distutils.core import setup, Extension
 import os
 
+# 
 
 def get_cpp():
     files = []
@@ -10,10 +11,10 @@ def get_cpp():
 
 
 def main():
-    setup(name="linux_proxy",
+    setup(name="dma_proxy",
           version="1.0.0",
-          description="linux_proxy",
-          ext_modules=[Extension("linux_proxy", get_cpp(), include_dirs=[
+          description="dma_proxy",
+          ext_modules=[Extension("dma_proxy", get_cpp(), include_dirs=[
               "include"
           ])])
 
