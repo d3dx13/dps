@@ -66,29 +66,6 @@ DMA_HEAP_IOC_MAGIC = 'H'
 DMA_HEAP_IOCTL_ALLOC = _IOWR(DMA_HEAP_IOC_MAGIC, 0, dma_heap_allocation_data)
 
 
-# Libcamera C++ classes
-class UniqueFD:
-    """Libcamera UniqueFD Class"""
-
-    def __init__(self, fd=-1):
-        print("init UniqueFD", fd)
-        if isinstance(fd, UniqueFD):
-            self.__fd = fd.release()
-        else:
-            self.__fd = fd
-
-    def release(self):
-        fd = self.__fd
-        self.__fd = -1
-        return fd
-
-    def get(self):
-        return self.__fd
-
-    def isValid(self):
-        return self.__fd >= 0
-
-
 class DmaHeap:
     """DmaHeap"""
 
@@ -126,25 +103,25 @@ class DmaHeap:
         if not isinstance(ret, bytes) and ret < 0:
             _log.error(f"dmaHeap naming failure for {name}")
             return -1
-
+        
         sync_file = dma_buf_export_sync_file()
         sync_file.flags = DMA_BUF_SYNC_READ | DMA_BUF_SYNC_WRITE
         ret = fcntl.ioctl(allocFd, DMA_BUF_IOCTL_EXPORT_SYNC_FILE, sync_file)
         if not isinstance(ret, bytes) and ret < 0:
             _log.error(f"dmaHeap export sync file failure for {name}")
             return -1
-
         print("sync_file fd", sync_file.fd)
-
+        
         return allocFd
 
-    def connect(self, fd) -> UniqueFD:
+    def connect(self, fd) -> int:
         sync_file = dma_buf_import_sync_file()
-        sync_file.flags = DMA_BUF_SYNC_READ | DMA_BUF_SYNC_WRITE
+        sync_file.flags = DMA_BUF_SYNC_READ # | DMA_BUF_SYNC_WRITE
         sync_file.fd = fd
-        ret = fcntl.ioctl(self.__dmaHeapHandle.get(), DMA_BUF_IOCTL_IMPORT_SYNC_FILE, sync_file)
+        ret = fcntl.ioctl(self.__dmaHeapHandle, DMA_BUF_IOCTL_IMPORT_SYNC_FILE, sync_file)
         if not isinstance(ret, bytes) and ret < 0:
             _log.error(f"dmaHeap export sync file failure")
-            return UniqueFD()
+            return -1
         print("ret", ret)
+        print("sync_file.fd", sync_file.fd)
         return ret
