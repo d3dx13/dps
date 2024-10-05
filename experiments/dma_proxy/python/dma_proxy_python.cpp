@@ -14,6 +14,25 @@ static PyObject *py_borrow_fd_from_pid(PyObject *self, PyObject *args) {
   return Py_BuildValue("i", borrow_fd_from_pid(pid, fd));
 }
 
+static PyObject *py_pidfd_open(PyObject *self, PyObject *args) {
+  int fd;
+  if (PyTuple_Size(args) != 1) {
+    PyErr_SetString(self, "func_ret_str args error");
+  }
+  PyArg_ParseTuple(args, "i", &fd);
+  return Py_BuildValue("i", pidfd_open(fd));
+}
+
+static PyObject *py_pidfd_getfd(PyObject *self, PyObject *args) {
+  int pid;
+  int fd;
+  if (PyTuple_Size(args) != 2) {
+    PyErr_SetString(self, "func_ret_str args error");
+  }
+  PyArg_ParseTuple(args, "ii", &pid, &fd);
+  return Py_BuildValue("i", pidfd_getfd(pid, fd));
+}
+
 /*
 dma_buf
 
@@ -108,6 +127,8 @@ static PyObject *py_close(PyObject *self, PyObject *args) {
 
 static PyMethodDef Methods[] = {
   {"borrow_fd_from_pid", py_borrow_fd_from_pid, METH_VARARGS, "borrow_fd_from_pid"},
+  {"pidfd_open", py_pidfd_open, METH_VARARGS, "pidfd_open"},
+  {"pidfd_getfd", py_pidfd_getfd, METH_VARARGS, "pidfd_getfd"},
   {"dmabuf_heap_open", py_dmabuf_heap_open, METH_VARARGS, "dmabuf_heap_open"},
   {"dmabuf_heap_close", py_dmabuf_heap_close, METH_VARARGS, "dmabuf_heap_close"},
   {"dmabuf_heap_alloc", py_dmabuf_heap_alloc, METH_VARARGS, "dmabuf_heap_alloc"},

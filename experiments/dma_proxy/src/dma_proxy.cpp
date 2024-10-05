@@ -8,6 +8,14 @@ int borrow_fd_from_pid(int pid, int fd){
   return syscall(SYS_pidfd_getfd, pid_fd, fd, 0); // PTRACE_MODE_ATTACH_REALCREDS
 }
 
+int pidfd_open(int fd){
+  return syscall(SYS_pidfd_open, fd, 0); // PTRACE_MODE_ATTACH_REALCREDS
+}
+
+int pidfd_getfd(int pid_fd, int fd){
+  return syscall(SYS_pidfd_getfd, pid_fd, fd, 0); // PTRACE_MODE_ATTACH_REALCREDS
+}
+
 /*
  * Depending on the configuration method, the name of the device node name
  * of the dmabuf-heap changes. If the CMA area is configured from a device
