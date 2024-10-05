@@ -51,6 +51,7 @@ static PyObject *py_dmabuf_heap_alloc(PyObject *self, PyObject *args) {
   return Py_BuildValue("i", dmabuf_heap_alloc(heap_fd, name, size));
 }
 
+/*
 static PyObject *py_dmabuf_export_sync_file(PyObject *self, PyObject *args) {
   int buf_fd;
   if (PyTuple_Size(args) != 1) {
@@ -76,6 +77,7 @@ static PyObject *py_dmabuf_import_sync_file(PyObject *self, PyObject *args) {
   ioctl(buf_fd, DMA_BUF_IOCTL_IMPORT_SYNC_FILE, &sync_file);
   return Py_BuildValue("i", sync_file.fd);
 }
+*/
 
 static PyObject *py_dmabuf_sync_start(PyObject *self, PyObject *args) {
   int buf_fd;
@@ -95,6 +97,15 @@ static PyObject *py_dmabuf_sync_stop(PyObject *self, PyObject *args) {
   return Py_BuildValue("i", dmabuf_sync_stop(buf_fd));
 }
 
+static PyObject *py_close(PyObject *self, PyObject *args) {
+  int fd;
+  if (PyTuple_Size(args) != 1) {
+    PyErr_SetString(self, "func_ret_str args error");
+  }
+  PyArg_ParseTuple(args, "i", &fd);
+  return Py_BuildValue("i", close(fd));
+}
+
 static PyMethodDef Methods[] = {
   {"borrow_fd_from_pid", py_borrow_fd_from_pid, METH_VARARGS, "borrow_fd_from_pid"},
   {"dmabuf_heap_open", py_dmabuf_heap_open, METH_VARARGS, "dmabuf_heap_open"},
@@ -102,8 +113,9 @@ static PyMethodDef Methods[] = {
   {"dmabuf_heap_alloc", py_dmabuf_heap_alloc, METH_VARARGS, "dmabuf_heap_alloc"},
   {"dmabuf_sync_start", py_dmabuf_sync_start, METH_VARARGS, "dmabuf_sync_start"},
   {"dmabuf_sync_stop", py_dmabuf_sync_stop, METH_VARARGS, "dmabuf_sync_stop"},
-  {"dmabuf_export_sync_file", py_dmabuf_export_sync_file, METH_VARARGS, "dmabuf_export_sync_file"},
-  {"dmabuf_import_sync_file", py_dmabuf_import_sync_file, METH_VARARGS, "dmabuf_import_sync_file"},
+  {"close", py_close, METH_VARARGS, "close"},
+  // {"dmabuf_export_sync_file", py_dmabuf_export_sync_file, METH_VARARGS, "dmabuf_export_sync_file"},
+  // {"dmabuf_import_sync_file", py_dmabuf_import_sync_file, METH_VARARGS, "dmabuf_import_sync_file"},
   {nullptr, nullptr, 0, nullptr}
 };
 

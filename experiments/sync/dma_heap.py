@@ -104,24 +104,4 @@ class DmaHeap:
             _log.error(f"dmaHeap naming failure for {name}")
             return -1
         
-        sync_file = dma_buf_export_sync_file()
-        sync_file.flags = DMA_BUF_SYNC_READ | DMA_BUF_SYNC_WRITE
-        ret = fcntl.ioctl(allocFd, DMA_BUF_IOCTL_EXPORT_SYNC_FILE, sync_file)
-        if not isinstance(ret, bytes) and ret < 0:
-            _log.error(f"dmaHeap export sync file failure for {name}")
-            return -1
-        print("sync_file fd", sync_file.fd)
-        
         return allocFd
-
-    def connect(self, fd) -> int:
-        sync_file = dma_buf_import_sync_file()
-        sync_file.flags = DMA_BUF_SYNC_READ # | DMA_BUF_SYNC_WRITE
-        sync_file.fd = fd
-        ret = fcntl.ioctl(self.__dmaHeapHandle, DMA_BUF_IOCTL_IMPORT_SYNC_FILE, sync_file)
-        if not isinstance(ret, bytes) and ret < 0:
-            _log.error(f"dmaHeap export sync file failure")
-            return -1
-        print("ret", ret)
-        print("sync_file.fd", sync_file.fd)
-        return ret

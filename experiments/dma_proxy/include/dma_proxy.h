@@ -19,8 +19,11 @@ int borrow_fd_from_pid(int pid, int fd);
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/ioctl.h>
+#include <stdio.h>
+
 #include <linux/dma-buf.h>
 #include <linux/dma-heap.h>
+#include <drm/drm.h>
 
 int dmabuf_heap_open();
 void dmabuf_heap_close(int heap_fd);

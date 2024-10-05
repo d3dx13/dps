@@ -7,32 +7,33 @@ import os
 from time import sleep, monotonic
 import dma_proxy
 import mmap
-import numpy as np
 import datetime
 import select
+import numpy as np
+import cv2
 
 print("PID:", os.getpid())
 
-pid_input = 11095 # int(input("Enter PID: "))
-fds_input = [4, 7, 10, 13, 16, 19, 22, 25, 28, 31]
-export_input = [5, 8, 11, 14, 17, 20, 23, 26, 29, 32]
+BUFF_SIZE = 640 * 480 * 2
+BUFF_LENGTH = 2
+
+pid_input = 38756 # int(input("Enter PID: "))
+fds_input = [4,]
+fds_input = [12, 13]
 
 dmabuf_fds = []
-dmabuf_import = []
-for i in range(10):
+memory = []
+for i in range(BUFF_LENGTH):
     dmabuf_fds.append(dma_proxy.borrow_fd_from_pid(pid_input, fds_input[i]))
-    dmabuf_import.append(dma_proxy.dmabuf_import_sync_file(dmabuf_fds[i], dma_proxy.borrow_fd_from_pid(pid_input, export_input[i])))
+    memory.append(mmap.mmap(dmabuf_fds[i], BUFF_SIZE, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE))
 print("dmabuf_fds", dmabuf_fds)
-print("dmabuf_import", dmabuf_import)
 
-
-event = select.epoll(sizehint=-1, flags=0)
-for fd in dmabuf_import:
-    event.register(fd=fd, eventmask=select.EPOLLOUT) # | select.EPOLLET
-
-events = set()
 
 while True:
-    res = event.poll()
-    events.add(tuple(res))
-    print(monotonic(), res, events)
+    frame = np.frombuffer(memory[0], np.uint8)
+    frame = np.reshape(frame, (480, 640, 2))[:,:,0]
+    cv2.imshow("frame1", frame)
+    frame = np.frombuffer(memory[1], np.uint8)
+    frame = np.reshape(frame, (480, 640, 2))[:,:,0]
+    cv2.imshow("frame2", frame)
+    cv2.waitKey(1)

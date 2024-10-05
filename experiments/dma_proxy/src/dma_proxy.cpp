@@ -3,6 +3,7 @@
 #endif
 
 int borrow_fd_from_pid(int pid, int fd){
+  printf("Pizdim %i from %i\n", fd, pid);
   int pid_fd = syscall(SYS_pidfd_open, pid, 0); // PIDFD_NONBLOCK
   return syscall(SYS_pidfd_getfd, pid_fd, fd, 0); // PTRACE_MODE_ATTACH_REALCREDS
 }
@@ -19,8 +20,9 @@ int dmabuf_heap_open()
   int i;
   static const char *heap_names[] = { "/dev/dma_heap/linux,cma", "/dev/dma_heap/reserved", "/dev/dma_heap/system" };
 
-  for(i = 0; i < 2; i++)
+  for(i = 0; i < 3; i++)
   {
+    printf("Try open fd %s\n", heap_names[i]);
     int fd = open(heap_names[i], O_RDWR, 0);
 
     if(fd >= 0)

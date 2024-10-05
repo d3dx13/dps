@@ -11,32 +11,41 @@ import numpy as np
 import datetime
 import select
 
+import cv2
+
 
 BUFF_SIZE = 640 * 480 * 3
+BUFF_LENGTH = 1
 
 os.system("cat /proc/meminfo | grep Cma")
 print("PID:", os.getpid())
 
-dmabuf_heap_fd = dma_proxy.dmabuf_heap_open();
+dmabuf_heap_fd = dma_proxy.dmabuf_heap_open()
 print("dmabuf_heap_fd", dmabuf_heap_fd)
 
 dmabuf_fds = []
-dmabuf_export = []
-dmabuf_maps = []
-for i in range(10):
+memory = []
+for i in range(BUFF_LENGTH):
     dmabuf_fds.append(dma_proxy.dmabuf_heap_alloc(dmabuf_heap_fd, f"test_{i}", BUFF_SIZE))
-    dmabuf_export.append(dma_proxy.dmabuf_export_sync_file(dmabuf_fds[i]))
-    dmabuf_maps.append(mmap.mmap(fileno=dmabuf_fds[i], length=BUFF_SIZE, flags=mmap.PROT_WRITE | mmap.PROT_READ, prot=mmap.MAP_SHARED))
+    memory.append(mmap.mmap(dmabuf_fds[i], BUFF_SIZE, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE))
 os.system("cat /proc/meminfo | grep Cma")
 print("dmabuf_fds", dmabuf_fds)
-print("dmabuf_export", dmabuf_export)
-print("dmabuf_maps", dmabuf_maps)
+
+cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
 
 counter = 0
-while counter < 10:
-    for i in range(10):
+while counter < 30 * 200:
+    for i in range(BUFF_LENGTH):
+        r, frame = cap.read()
         dma_proxy.dmabuf_sync_start(dmabuf_fds[i])
-        sleep(0.1)
+        memory[i][:] = frame.tobytes()
         dma_proxy.dmabuf_sync_stop(dmabuf_fds[i])
     counter += 1
-dma_proxy.dmabuf_heap_close(dmabuf_heap_fd)
+
+cap.release()
+for i in range(BUFF_LENGTH):
+    dma_proxy.close(dmabuf_fds[i])
+dma_proxy.close(dmabuf_heap_fd)
