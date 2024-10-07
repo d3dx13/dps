@@ -40,27 +40,52 @@ static PyObject *py_pidfd_getfd(PyObject *self, PyObject *args) {
 }
 
 /*
-tmpfile
+shared memory
 */
-static PyObject *py_tmpfile(PyObject *self, PyObject *args) {
-  char *path;
-  char *name;
-  if (PyTuple_Size(args) != 2) {
+void signalHandler(int signum) {
+  std::cout << "Interrupt signal (" << signum << ") received." << getpid() << "\n";
+
+  // cleanup and close up stuff here  
+  // terminate program  
+  char name[256];
+  sprintf(name, "/dev/shm/ips/node/%d", getpid());
+  remove(name);
+
+  exit(signum);
+}
+static PyObject *py_shm_open(PyObject *self, PyObject *args) {
+  char root[256] = "/dev/shm/ips/node/";
+  const char *name;
+  size_t len = 4096;
+  void *addr;
+  if (PyTuple_Size(args) != 1) {
     PyErr_SetString(self, "func_ret_str args error");
   }
-  PyArg_ParseTuple(args, "ss", &path, &name);
-  printf("Vremenno %s slave %s\n", name, path);
-  #define P_tmpdir "/dev/shm"
-  FILE* tmpf = tmpfile();
-  char writeToFile[50] = "Creating a temporary file adawdadadadwadawdwa\n";
-  fputs(writeToFile, tmpf);
-	rewind(tmpf);
-  char readFromFile[50];
-	fgets(readFromFile, sizeof(readFromFile), tmpf);
-  std::cout << readFromFile << "\n";
-  std::cout << fileno(tmpf) << "\n";
-	// fclose(tmpf);
-  return Py_BuildValue("i", fileno(tmpf));
+  PyArg_ParseTuple(args, "s", &name);
+  
+  printf("Polish %s suka blyat %s\n", strcat(root, name), name);
+  
+  // FILE* tmpf = tmpfile();
+  // fputs("Hello, world", tmpf);
+  // rewind(tmpf);
+  // int fd = fileno(tmpf);
+
+  // int newdirfd = open("/dev/shm/", O_DIRECTORY | O_PATH);
+  // const char *newname = "test"
+
+  // linkat(AT_FDCWD, "/proc/self/fd/3", newdirfd, name, AT_);
+  
+  for (int i = 1; i <= 15; i++){
+    std::cout << i << "\n";
+    signal(i, signalHandler);
+  }
+
+  int fd = open(root, O_RDWR | O_CREAT, 0600);
+  flock(fd, LOCK_EX);
+  // link(root, root);
+  // unlink(root);
+
+  return Py_BuildValue("i", fd);
 }
 
 /*
@@ -157,7 +182,7 @@ static PyObject *py_close(PyObject *self, PyObject *args) {
 
 static PyMethodDef Methods[] = {
   {"borrow_fd_from_pid", py_borrow_fd_from_pid, METH_VARARGS, "borrow_fd_from_pid"},
-  {"tmpfile", py_tmpfile, METH_VARARGS, "tmpfile"},
+  {"shm_open", py_shm_open, METH_VARARGS, "shm_open"},
   {"pidfd_open", py_pidfd_open, METH_VARARGS, "pidfd_open"},
   {"pidfd_getfd", py_pidfd_getfd, METH_VARARGS, "pidfd_getfd"},
   {"dmabuf_heap_open", py_dmabuf_heap_open, METH_VARARGS, "dmabuf_heap_open"},

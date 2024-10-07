@@ -4,6 +4,8 @@
 #define INCLUDE_HEADER
 #endif
 
+#include <stdlib.h>
+
 // borrow_fd_from_pid
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -13,8 +15,13 @@ int borrow_fd_from_pid(int pid, int fd);
 int pidfd_open(int fd);
 int pidfd_getfd(int pid, int fd);
 
-// mkstemp
-#include <stdlib.h>
+// shared memory
+#include <signal.h>
+#include <pthread.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/file.h>
 
 // dma_buf
 #include <errno.h>
