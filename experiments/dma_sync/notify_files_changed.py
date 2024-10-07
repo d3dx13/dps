@@ -65,7 +65,7 @@ mask = IN_CREATE | IN_DELETE | IN_OPEN | IN_CLOSE | IN_MODIFY
 
 fds = []
 paths = [
-    "/sys/fs/fuse/connections"
+    "/dev/shm/ips/node/",
 ]
 
 inotify_fd = linux_proxy.inotify_init1(0)

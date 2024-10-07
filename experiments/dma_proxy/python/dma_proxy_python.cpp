@@ -1,6 +1,8 @@
 #include <Python.h>
 #include "dma_proxy.h"
 
+#include<iostream>
+
 // https://docs.python.org/3/c-api/arg.html
 
 /*
@@ -38,58 +40,27 @@ static PyObject *py_pidfd_getfd(PyObject *self, PyObject *args) {
 }
 
 /*
-mkstemp
-
-int mkstemp(char *name);
-int mkostemp(char *name, int flags);
-int mkstemps(char *name, int suffixlen);
-int mkostemps(char *name, int suffixlen, int flags);
-
-char *mkdtemp(char *name);
+tmpfile
 */
-static PyObject *py_mkstemp(PyObject *self, PyObject *args) {
+static PyObject *py_tmpfile(PyObject *self, PyObject *args) {
+  char *path;
   char *name;
-  if (PyTuple_Size(args) != 1) {
-    PyErr_SetString(self, "func_ret_str args error");
-  }
-  PyArg_ParseTuple(args, "s", &name);
-  return Py_BuildValue("i", mkstemp(name));
-}
-static PyObject *py_mkostemp(PyObject *self, PyObject *args) {
-  char *name;
-  int flags;
   if (PyTuple_Size(args) != 2) {
     PyErr_SetString(self, "func_ret_str args error");
   }
-  PyArg_ParseTuple(args, "si", &name, &flags);
-  return Py_BuildValue("i", mkostemp(name, flags));
-}
-static PyObject *py_mkstemps(PyObject *self, PyObject *args) {
-  char *name;
-  int suffixlen;
-  if (PyTuple_Size(args) != 2) {
-    PyErr_SetString(self, "func_ret_str args error");
-  }
-  PyArg_ParseTuple(args, "si", &name, &suffixlen);
-  return Py_BuildValue("i", mkstemps(name, suffixlen));
-}
-static PyObject *py_mkostemps(PyObject *self, PyObject *args) {
-  char *name;
-  int suffixlen;
-  int flags;
-  if (PyTuple_Size(args) != 3) {
-    PyErr_SetString(self, "func_ret_str args error");
-  }
-  PyArg_ParseTuple(args, "sii", &name, &suffixlen, &flags);
-  return Py_BuildValue("i", mkostemps(name, suffixlen, flags));
-}
-static PyObject *py_mkdtemp(PyObject *self, PyObject *args) {
-  char *name;
-  if (PyTuple_Size(args) != 1) {
-    PyErr_SetString(self, "func_ret_str args error");
-  }
-  PyArg_ParseTuple(args, "s", &name);
-  return Py_BuildValue("s", mkdtemp(name));
+  PyArg_ParseTuple(args, "ss", &path, &name);
+  printf("Vremenno %s slave %s\n", name, path);
+  #define P_tmpdir "/dev/shm"
+  FILE* tmpf = tmpfile();
+  char writeToFile[50] = "Creating a temporary file adawdadadadwadawdwa\n";
+  fputs(writeToFile, tmpf);
+	rewind(tmpf);
+  char readFromFile[50];
+	fgets(readFromFile, sizeof(readFromFile), tmpf);
+  std::cout << readFromFile << "\n";
+  std::cout << fileno(tmpf) << "\n";
+	// fclose(tmpf);
+  return Py_BuildValue("i", fileno(tmpf));
 }
 
 /*
@@ -186,11 +157,7 @@ static PyObject *py_close(PyObject *self, PyObject *args) {
 
 static PyMethodDef Methods[] = {
   {"borrow_fd_from_pid", py_borrow_fd_from_pid, METH_VARARGS, "borrow_fd_from_pid"},
-  {"mkstemp", py_mkstemp, METH_VARARGS, "mkstemp"},
-  {"mkostemp", py_mkostemp, METH_VARARGS, "mkostemp"},
-  {"mkstemps", py_mkstemps, METH_VARARGS, "mkstemps"},
-  {"mkostemps", py_mkostemps, METH_VARARGS, "mkostemps"},
-  {"mkdtemp", py_mkdtemp, METH_VARARGS, "mkdtemp"},
+  {"tmpfile", py_tmpfile, METH_VARARGS, "tmpfile"},
   {"pidfd_open", py_pidfd_open, METH_VARARGS, "pidfd_open"},
   {"pidfd_getfd", py_pidfd_getfd, METH_VARARGS, "pidfd_getfd"},
   {"dmabuf_heap_open", py_dmabuf_heap_open, METH_VARARGS, "dmabuf_heap_open"},

@@ -101,38 +101,39 @@ static PyObject *py_inotify_event_read(PyObject *self, PyObject *args) {
       perror( "read" );
   }
   while ( i < length ) {
-    printf( "i %i\n", i );
     struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
+    printf( "i %i \n" );
     if ( event->len ) {
+        printf( "mask %i \n", event->mask );
+        printf( "name %s \n", event->name );
+        printf( "name %d \n", event->wd );
         if ( event->mask & IN_OPEN) {
             if (event->mask & IN_ISDIR)
                 printf( "The directory %s was opened.\n", event->name );
             else
                 printf( "The file %s was opened with WD %d\n", event->name, event->wd );
-        }
-        if ( event->mask & IN_CREATE) {
+        } else if ( event->mask & IN_CREATE) {
             if (event->mask & IN_ISDIR)
                 printf( "The directory %s was created.\n", event->name );
             else
                 printf( "The file %s was created with WD %d\n", event->name, event->wd );
-        }
-        if ( event->mask & IN_DELETE) {
+        } else if ( event->mask & IN_DELETE) {
             if (event->mask & IN_ISDIR)
                 printf( "The directory %s was deleted.\n", event->name );
             else
                 printf( "The file %s was deleted with WD %d\n", event->name, event->wd );
-        }
-        if ( event->mask & IN_CLOSE) {
+        } else if ( event->mask & IN_CLOSE) {
             if (event->mask & IN_ISDIR)
                 printf( "The directory %s was closed.\n", event->name );
             else
                 printf( "The file %s was closed with WD %d\n", event->name, event->wd );
-        }
-        if ( event->mask & IN_MODIFY) {
+        } else if ( event->mask & IN_MODIFY) {
             if (event->mask & IN_ISDIR)
                 printf( "The directory %s was modified.\n", event->name );
             else
                 printf( "The file %s was modified with WD %d\n", event->name, event->wd );
+        } else {
+          printf( "UNKNOWN\n" );
         }
         i += EVENT_SIZE + event->len;
     } else {
