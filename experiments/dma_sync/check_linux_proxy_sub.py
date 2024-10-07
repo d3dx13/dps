@@ -33,12 +33,21 @@ for i in range(BUFF_LENGTH):
     memory.append(mmap.mmap(dmabuf_fds[i], BUFF_SIZE, mmap.MAP_SHARED, mmap.PROT_READ | mmap.PROT_WRITE))
 print("dmabuf_fds", dmabuf_fds)
 
+event = select.epoll(sizehint=-1, flags=0)
+event.register(fd=pid_fd, eventmask=select.EPOLLIN | select.EPOLLPRI)
 
 i = 0
 while True:
+    res = event.poll(timeout=0.01)
+    if len(res) > 0:
+        print("Event", res)
+        # break
+    
     # dma_proxy.dmabuf_sync_start(dmabuf_fds[i])
     frame = np.frombuffer(memory[i], np.uint8)
     frame = np.reshape(frame, (480, 640, 3))
     cv2.imshow("frame", frame)
     cv2.waitKey(10)
     # dma_proxy.dmabuf_sync_stop(dmabuf_fds[i])
+
+cv2.destroyAllWindows()

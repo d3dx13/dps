@@ -13,6 +13,9 @@ int borrow_fd_from_pid(int pid, int fd);
 int pidfd_open(int fd);
 int pidfd_getfd(int pid, int fd);
 
+// mkstemp
+#include <stdlib.h>
+
 // dma_buf
 #include <errno.h>
 #include <sys/types.h>
