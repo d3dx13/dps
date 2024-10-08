@@ -60,12 +60,13 @@ print(resource.setrlimit(resource.RLIMIT_NOFILE, (1048576, 1048576)))
 
 event = select.epoll(sizehint=-1, flags=0)
 
+# mask = IN_DELETE | IN_CLOSE | IN_MODIFY
 mask = IN_CREATE | IN_DELETE | IN_OPEN | IN_CLOSE | IN_MODIFY
-# mask = IN_CREATE | IN_DELETE | IN_OPEN | IN_CLOSE | IN_MODIFY
 
 fds = []
 paths = [
-    "/dev/shm/ips/node",
+    "/dev/shm/.dps/node",
+    "/dev/shm/.dps/topic",
 ]
 
 inotify_fd = linux_proxy.inotify_init1(0)
@@ -76,7 +77,7 @@ for path_str in paths:
 
 for fd in fds:
     print(fd)
-    event.register(fd=fd, eventmask=select.EPOLLIN)
+    event.register(fd=fd)
 
 while True:
     events = event.poll()
@@ -86,4 +87,4 @@ while True:
         for fd in fds:
             if fd == event_pair[0]:
                 temp = linux_proxy.inotify_event_read(inotify_fd)
-                print(event_pair, fd, temp)
+                print("HALP", event_pair, fd, temp)

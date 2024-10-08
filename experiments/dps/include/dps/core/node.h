@@ -13,5 +13,9 @@ namespace dps {
         private:
             std::string name;
             int pid;
+
+            void init_filesystem();
+
+            static void signalHandler(int signum);
     };
 }
