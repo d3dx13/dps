@@ -1,0 +1,14 @@
+namespace ImageTools;
+
+table Image {
+  size:Size;
+  raw:[ubyte];
+}
+
+table Size {
+  width:ushort;
+  height:ushort;
+  depth:ubyte;
+}
+
+root_type Image;
