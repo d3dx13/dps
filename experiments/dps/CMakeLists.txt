@@ -10,11 +10,12 @@ project(dps LANGUAGES CXX C)
 
 set(SHARED_CPP_FILES 
     src/node.cpp
+    src/publisher.cpp
 )
 
-set(SRC_CPP_FILES 
-    src/dma_proxy.cpp
-)
+# set(SRC_CPP_FILES 
+#     src/dma_proxy.cpp
+# )
 
 add_library(dps SHARED 
     ${SHARED_CPP_FILES}

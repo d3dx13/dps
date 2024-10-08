@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <signal.h>
+
 #include <string>
 #include <fstream>
 #include <iostream>

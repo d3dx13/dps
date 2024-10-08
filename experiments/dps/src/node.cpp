@@ -1,5 +1,4 @@
 #include "dps/core/node.h"
-#include "dma_proxy.h"
 
 namespace dps {
     Node::Node() : Node(std::string("")){};
@@ -23,6 +22,16 @@ namespace dps {
         Node::signalHandler(0);
     }
 
+    template<typename MessageT>
+    Publisher<MessageT> Node::create_publisher(std::string path){
+        return Publisher<MessageT>();
+    }
+
+
+    std::string Node::get_name(){
+        return this->name;
+    }
+    
     int Node::get_pid(){
         return this->pid;
     }
