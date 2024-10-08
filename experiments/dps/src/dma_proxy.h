@@ -8,8 +8,6 @@
 #include <iostream>
 #include <string>
 
-timespec get_timestamp();
-
 // borrow_fd_from_pid
 #include <sys/syscall.h>
 #include <unistd.h>

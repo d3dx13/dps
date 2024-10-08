@@ -9,7 +9,7 @@ project(dps LANGUAGES CXX C)
 add_library(dps SHARED IMPORTED) # or STATIC instead of SHARED
 set_target_properties(dps PROPERTIES
   IMPORTED_LOCATION "/home/d3dx13/workspace/ips/experiments/dps/build/libdps.so"
-  INTERFACE_INCLUDE_DIRECTORIES "/home/d3dx13/workspace/ips/experiments/dps/shared/include"
+  INTERFACE_INCLUDE_DIRECTORIES "/home/d3dx13/workspace/ips/experiments/dps/include"
 )
 
 set(MAIN_SRCS "main.cpp")

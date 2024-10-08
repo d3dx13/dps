@@ -1,13 +1,6 @@
 #ifndef INCLUDE_HEADER
 #include "dma_proxy.h"
-#include "dps/core.h"
 #endif
-
-timespec get_timestamp(){
-  struct timespec timestamp={0,0};
-  clock_gettime(CLOCK_MONOTONIC, &timestamp);
-  return timestamp;
-}
 
 int borrow_fd_from_pid(int pid, int fd){
   printf("Pizdim %i from %i\n", fd, pid);

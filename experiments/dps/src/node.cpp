@@ -1,5 +1,6 @@
-#include "dps/core.h"
+#include "dps/core/node.h"
 #include "dma_proxy.h"
+
 
 namespace dps {
     Node::Node() : Node(std::string("")){};
@@ -7,7 +8,8 @@ namespace dps {
         this->name = name;
         this->pid = getpid();
 
-        timespec timestamp = get_timestamp();
+        struct timespec timestamp={0,0};
+        clock_gettime(CLOCK_MONOTONIC, &timestamp);
         std::cout << "timestamp " << timestamp.tv_sec <<  " " << timestamp.tv_nsec << "\n";
         if (this->name.length() == 0) {
             this->name = std::string("unknown_") + std::to_string(timestamp.tv_sec) + std::string("_") + std::to_string(timestamp.tv_nsec);

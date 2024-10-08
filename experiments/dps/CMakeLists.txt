@@ -9,7 +9,7 @@ project(dps LANGUAGES CXX C)
 #Generate the shared library from the library sources
 
 set(SHARED_CPP_FILES 
-    shared/src/node.cpp
+    src/node.cpp
 )
 
 set(SRC_CPP_FILES 
@@ -24,5 +24,4 @@ add_library(dps SHARED
 target_include_directories(dps
     PUBLIC 
         ${PROJECT_SOURCE_DIR}/include
-        ${PROJECT_SOURCE_DIR}/shared/include
 )
