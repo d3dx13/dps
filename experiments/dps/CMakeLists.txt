@@ -10,7 +10,6 @@ project(dps LANGUAGES CXX C)
 
 set(SHARED_CPP_FILES 
     src/node.cpp
-    src/publisher.cpp
 )
 
 # set(SRC_CPP_FILES 

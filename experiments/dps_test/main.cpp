@@ -14,7 +14,8 @@ struct test_msg {
 class SimpleNode : public dps::Node {
     public:
         SimpleNode() : dps::Node("SimpleNode"){
-            dps::Publisher<int> pub = this->create_publisher<int>("test");
+            // auto pub = this->create_publisher<test_msg>(test_msg, "test");
+            // dps::Publisher this->create("test");
         }
 };
 

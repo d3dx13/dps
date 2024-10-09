@@ -22,12 +22,6 @@ namespace dps {
         Node::signalHandler(0);
     }
 
-    template<typename MessageT>
-    Publisher<MessageT> Node::create_publisher(std::string path){
-        return Publisher<MessageT>();
-    }
-
-
     std::string Node::get_name(){
         return this->name;
     }

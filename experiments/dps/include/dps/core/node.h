@@ -1,5 +1,4 @@
 #include "dps/core/config.h"
-#include "dps/core/publisher.h"
 
 namespace dps {
     class Node {
@@ -13,9 +12,6 @@ namespace dps {
             int get_pid();
 
         protected:
-            template<typename MessageT>
-            Publisher<MessageT> create_publisher(std::string path);
-
             std::string name;
             int pid;
 
