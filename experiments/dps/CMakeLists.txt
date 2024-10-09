@@ -10,6 +10,7 @@ project(dps LANGUAGES CXX C)
 
 set(SHARED_CPP_FILES 
     src/node.cpp
+    src/base_publisher.cpp
     include/dps/core/publisher.hpp
 )
 

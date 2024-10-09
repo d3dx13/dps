@@ -7,7 +7,7 @@ namespace dps {
             int queue;
 
         public:
-            MessageT *msg;
+            std::unique_ptr<MessageT> msg;
 
             Publisher(int queue);
 
@@ -19,22 +19,22 @@ namespace dps {
     {
         this->queue = queue;
 
-        // this->msg = new T{};
+        // this->msg = std::make_unique<MessageT>();
 
         /*
-        this->message_pool = new T[this->queue];
+        this->message_pool = std::make_unique<MessageT>[this->queue];
         
         for (int i = 0; i < this->queue; i++){
-            *(this->message_pool + i) = new T{};
+            *(this->message_pool + i) = std::make_unique<MessageT>();
         }
         */
 
-        this->msg = new MessageT{};
+        this->msg = std::make_unique<MessageT>();
     }
 
     template <typename MessageT> void Publisher<MessageT>::publish()
     {
-        this->msg = new MessageT{};
+        this->msg = std::make_unique<MessageT>();
     }
 
     template <typename MessageT> void Publisher<MessageT>::print()
