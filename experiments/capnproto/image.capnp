@@ -7,6 +7,6 @@ struct Size {
 }
 
 struct Image {
-  size @0 :Size;
-  raw @1 :List(UInt8);
+  raw @0 :List(UInt8);
+  size @1 :Size;
 }
