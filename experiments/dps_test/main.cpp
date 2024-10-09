@@ -21,6 +21,21 @@ class SimpleNode : public dps::Node {
 
 int main(int argc, char *argv[])
 {
+    
+    dps::Publisher<test_msg> pub(10);
+
+    pub.print();
+
+    pub.msg->a = 12312;
+    pub.msg->b = 111;
+    pub.msg->c = 44444;
+    cout << "size " << sizeof(pub.msg) << "\n";
+
+    pub.print();
+
+    pub.publish();
+    pub.print();
+    
     int temp;
 
     SimpleNode node = SimpleNode();
