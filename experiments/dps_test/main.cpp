@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     
     system("tree -ahp /dev/shm/");
 
-    cin >> temp;
+    // cin >> temp;
 
     // raise(SIGSEGV);
     
