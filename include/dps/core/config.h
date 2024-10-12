@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
+#include <algorithm> 
 
 #include <fcntl.h>
 #include <linux/dma-buf.h>
@@ -13,6 +14,9 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#include <sys/syscall.h>
+
+#define DMA_HEAP_PATH "/dev/dma_heap/"
 #define DPS_BASE_PATH "/dev/shm/.dps"
 #define DPS_TOPIC_PATH "topic"
 #define DPS_NODE_PATH "node"

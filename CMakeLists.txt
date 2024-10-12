@@ -1,29 +1,33 @@
-# https://gitlab.com/CLIUtils/modern-cmake/-/blob/master/examples/extended-project/CMakeLists.txt
+cmake_minimum_required(VERSION 3.5)
 
-cmake_minimum_required(VERSION 3.14...3.28)
-project(
-        IPS
-        VERSION 0.0
-        DESCRIPTION "Lib"
-        LANGUAGES CXX
+project(dps LANGUAGES CXX C)
+
+############################################################
+# Create a library
+############################################################
+
+#Generate the shared library from the library sources
+
+set(SHARED_CPP_FILES 
+    src/node.cpp
+    src/dma_buffer.cpp
+    src/base_publisher.cpp
+    include/dps/core/publisher.hpp
 )
 
-set(MSG_INCLUDE_DIRS "${IPS_SOURCE_DIR}/msg")
-include_directories( ${MSG_INCLUDE_DIRS} )
+# set(SRC_CPP_FILES 
+#     src/dma_proxy.cpp
+# )
 
-find_package( OpenCV REQUIRED )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_library(dps SHARED 
+    ${SHARED_CPP_FILES}
+    ${SRC_CPP_FILES}
+)
 
-set(CMAKE_CXX_STANDARD 17)
-
-# The compiled library code is here
-add_subdirectory(src)
+target_include_directories(dps
+    PUBLIC 
+        ${PROJECT_SOURCE_DIR}/include
+)
 
 # The executable code is here
 add_subdirectory(apps)
-
-# Python library is here
-# add_subdirectory(python)
-
-add_library(libcamera SHARED IMPORTED)
-add_dependencies(libcamera libcamera_source)
