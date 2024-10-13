@@ -16,7 +16,7 @@
 
 #include <sys/syscall.h>
 
-#define HEADER_SIZE 4096
+#define PAGE_SIZE 4096
 #define DMA_HEAP_PATH "/dev/dma_heap/"
 
 #define DPS_BASE_PATH "/dev/shm/.dps"

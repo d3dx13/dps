@@ -15,11 +15,11 @@ int main(int argc, char *argv[])
     cout << "fd " << dma.fd() << "\n";
     cout << "\n";
     for (int i = 0; i < dma.size(); i++){
-        dma.buffer[i] = (uint8_t)(200 - i);
-        dma.header->msg_id += 1;
+        dma.buffer()[i] = (uint8_t)(200 - i);
+        dma.header()->msg_id += 1;
     }
     for (int i = 0; i < dma.size(); i++){
-        cout << (int) dma.buffer[i] << ", ";
+        cout << (int) dma.buffer()[i] << ", ";
     }
 
     // dma.~DMABuffer();

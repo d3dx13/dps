@@ -17,9 +17,9 @@ int main(int argc, char *argv[])
 
     dps::DMABuffer dma(pid, fd);
     cout << "Size: " << dma.size() << "\n";
-    cout << "dma.header->msg_id: " << dma.header->msg_id << "\n";
+    cout << "dma.header->msg_id: " << dma.header()->msg_id << "\n";
     for (int i = 0; i < dma.size(); i++){
-        cout << (int) dma.buffer[i] << ", ";
+        cout << (int) dma.buffer()[i] << ", ";
     }
     cout << "\n";
     

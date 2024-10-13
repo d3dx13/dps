@@ -51,7 +51,7 @@ namespace dps {
         Allocate DMA Buffer with size != 0
         */
         struct dma_heap_allocation_data heap_data = {};
-        heap_data.len = HEADER_SIZE + size;
+        heap_data.len = PAGE_SIZE + size;
         heap_data.fd_flags = O_RDWR | O_CLOEXEC;
         if (ioctl(heap_fd, DMA_HEAP_IOCTL_ALLOC, &heap_data) != 0) {
             std::cerr << "dma heap alloc failed, len: " << heap_data.len << "\n";
@@ -146,33 +146,24 @@ namespace dps {
     }
 
     void DMABuffer::release() {
-        if (this->dma_buf_fd > 0) {
-            /*
-            Close dma_buff
-            */
-            close(this->dma_buf_fd);
-            this->dma_buf_fd = -1;
-            
-            /*
-            unmap memory
-            */
-            if (this->header != nullptr) {
-                munmap(this->header, HEADER_SIZE);
-            }
-            this->header = nullptr;
-            if (this->buffer != nullptr) {
-                munmap(this->buffer, this->full_size - HEADER_SIZE);
-            }
-            this->buffer = nullptr;
-            
-            /*
-            Reset local variables to default
-            */
-            this->message_size = 0;
-            this->full_size = 0;
-            this->heap_name = "";
-            this->buffer_name = "";
-        }
+        /*
+        Close dma_buff
+        */
+        close(this->dma_buf_fd);
+        this->dma_buf_fd = -1;
+
+        /*
+        unmap memory
+        */
+        this->unmap();
+        
+        /*
+        Reset local variables to default
+        */
+        this->message_size = 0;
+        this->full_size = 0;
+        this->heap_name = "";
+        this->buffer_name = "";
     }
 
     void DMABuffer::map(bool readonly) {
@@ -182,11 +173,11 @@ namespace dps {
         Since we can't always control the offset in memory when we pass dma_buff to the driver, 
         the header is placed as an additional PAGE of 4096 bytes at the end of the buffer. 
         */
-        this->header = (dma_buffer_header *) mmap(NULL, HEADER_SIZE, 
+        this->_header = (dma_buffer_header *) mmap(NULL, PAGE_SIZE, 
             readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
-            MAP_SHARED, this->dma_buf_fd, this->full_size - HEADER_SIZE
+            MAP_SHARED, this->dma_buf_fd, this->full_size - PAGE_SIZE
         );
-        if (this->header == MAP_FAILED) {
+        if (this->_header == MAP_FAILED) {
             std::cerr << "dma_buff mmap header_mem failed, fd: " << this->dma_buf_fd << "\n";
             raise(SIGSEGV);
         }
@@ -194,9 +185,9 @@ namespace dps {
         Get and Provide information from the header that was not available before Header mmap()
         */
         if (!readonly) {
-            this->header->size = this->message_size;
+            this->_header->size = this->message_size;
         } else {
-            this->message_size = this->header->size;
+            this->message_size = this->_header->size;
         }
         
         /*
@@ -204,16 +195,27 @@ namespace dps {
         
         nmap is split into 2 separate calls so that it is not possible to enter the Header address space from the buffer without Seg Falt
         */
-        if (this->full_size - HEADER_SIZE != 0) {
-            this->buffer = (uint8_t *) mmap(NULL, this->full_size - HEADER_SIZE, 
+        if (this->full_size - PAGE_SIZE != 0) {
+            this->_buffer = (uint8_t *) mmap(NULL, this->full_size - PAGE_SIZE, 
                 readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
                 MAP_SHARED, this->dma_buf_fd, 0
             );
-            if (this->buffer == MAP_FAILED) {
+            if (this->_buffer == MAP_FAILED) {
                 std::cerr << "dma_buff mmap body_mem failed, fd: " << this->dma_buf_fd << "\n";
                 raise(SIGSEGV);
             }
         }
+    }
+    
+    void DMABuffer::unmap() {
+        if (this->_header != nullptr) {
+            munmap(this->_header, PAGE_SIZE);
+        }
+        this->_header = nullptr;
+        if (this->_buffer != nullptr) {
+            munmap(this->_buffer, this->full_size - PAGE_SIZE);
+        }
+        this->_buffer = nullptr;
     }
 
     int DMABuffer::fd() {
@@ -221,7 +223,15 @@ namespace dps {
     }
 
     size_t DMABuffer::size() {
-        return this->header->size;
+        return this->_header->size;
+    }
+
+    uint8_t * DMABuffer::buffer() {
+        return this->_buffer;
+    }
+
+    dma_buffer_header * DMABuffer::header() {
+        return this->_header;
     }
 
     std::string DMABuffer::get_heap_name() {

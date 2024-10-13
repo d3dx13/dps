@@ -15,13 +15,11 @@ namespace dps {
             
             int fd();
             size_t size();
+            uint8_t * buffer();
+            dma_buffer_header * header();
 
-            std::unique_ptr<uint8_t> get_buffer();
             std::string get_heap_name();
             std::string get_buffer_name();
-
-            uint8_t * buffer;
-            dma_buffer_header * header;
         
         protected:
             void allocate(size_t size, std::string heap_name, std::string buffer_name);
@@ -38,6 +36,8 @@ namespace dps {
             std::string buffer_name;
 
             int dma_buf_fd = -1;
+            uint8_t * _buffer;
+            dma_buffer_header * _header;
 
             void update_buffer_info();
 
