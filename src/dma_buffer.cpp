@@ -23,8 +23,14 @@ inline void trim(std::string &s) {
 }
 
 namespace dps {
-    DMABuffer::DMABuffer() {
+    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name) {
+        this->allocate(size, heap_name, buffer_name);
+        this->map(false);
+    }
 
+    DMABuffer::DMABuffer(int pid, int fd) {
+        this->connect(pid, fd);
+        this->map(true);
     }
 
     DMABuffer::~DMABuffer() {
@@ -65,7 +71,8 @@ namespace dps {
             std::cerr << "dma buf rename failed, name: " << dma_buf_name << "\n";
         }
 
-        this->fd = heap_data.fd;
+        this->message_size = size;
+        this->dma_buf_fd = heap_data.fd;
         this->update_buffer_info();
     }
 
@@ -89,7 +96,7 @@ namespace dps {
         }
         close(pid_fd);
 
-        this->fd = dma_buf_fd;
+        this->dma_buf_fd = dma_buf_fd;
         this->update_buffer_info();
     }
 
@@ -100,9 +107,9 @@ namespace dps {
         std::string heap_name = "";
         std::string buffer_name = "";
         size_t size = 0;
-        std::ifstream fd_info("/proc/self/fdinfo/" + std::to_string(this->fd));
+        std::ifstream fd_info("/proc/self/fdinfo/" + std::to_string(this->dma_buf_fd));
         if(!fd_info.good()){
-            std::cerr << "read fdinfo failed: " << fd << "\n";
+            std::cerr << "read fdinfo failed: " << this->dma_buf_fd << "\n";
             raise(SIGSEGV);
         }
         std::string line;
@@ -126,7 +133,7 @@ namespace dps {
         We must have DMA Buffer info and DMA Buffer can not have 0 length
         */
         if (!size) {
-            std::cerr << "read fdinfo size failed " << fd << "\n";
+            std::cerr << "read fdinfo size failed " << this->dma_buf_fd << "\n";
             raise(SIGSEGV);
         }
 
@@ -135,47 +142,86 @@ namespace dps {
         */
         this->heap_name = heap_name;
         this->buffer_name = buffer_name;
-        this->size = size;
+        this->full_size = size;
     }
 
     void DMABuffer::release() {
-        if (this->fd > 0) {
-            close(this->fd);
-
-            this->fd = -1;
+        if (this->dma_buf_fd > 0) {
+            /*
+            Close dma_buff
+            */
+            close(this->dma_buf_fd);
+            this->dma_buf_fd = -1;
+            
+            /*
+            unmap memory
+            */
+            if (this->header != nullptr) {
+                munmap(this->header, HEADER_SIZE);
+            }
+            this->header = nullptr;
+            if (this->buffer != nullptr) {
+                munmap(this->buffer, this->full_size - HEADER_SIZE);
+            }
+            this->buffer = nullptr;
+            
+            /*
+            Reset local variables to default
+            */
+            this->message_size = 0;
+            this->full_size = 0;
             this->heap_name = "";
             this->buffer_name = "";
-            this->size = 0;
-
-            // TODO add unmap to this->buffer
         }
     }
 
-    void DMABuffer::map() {
-        // TODO make this shit unmappable
-        void *header_mem = mmap(NULL, HEADER_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, this->fd, this->size - HEADER_SIZE);
-        if (header_mem == MAP_FAILED) {
-            std::cerr << "dma_buff mmap header_mem failed, fd: " << this->fd << "\n";
+    void DMABuffer::map(bool readonly) {
+        /*
+        Map Header
+
+        Since we can't always control the offset in memory when we pass dma_buff to the driver, 
+        the header is placed as an additional PAGE of 4096 bytes at the end of the buffer. 
+        */
+        this->header = (dma_buffer_header *) mmap(NULL, HEADER_SIZE, 
+            readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
+            MAP_SHARED, this->dma_buf_fd, this->full_size - HEADER_SIZE
+        );
+        if (this->header == MAP_FAILED) {
+            std::cerr << "dma_buff mmap header_mem failed, fd: " << this->dma_buf_fd << "\n";
             raise(SIGSEGV);
         }
-        this->header = static_cast<dma_buffer_header *>(header_mem);
-        if (this->size - HEADER_SIZE != 0) {
-            // TODO make this shit unmappable 2
-            void *body_mem = mmap(NULL, this->size - HEADER_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, this->fd, 0);
-            if (body_mem == MAP_FAILED) {
-                std::cerr << "dma_buff mmap body_mem failed, fd: " << this->fd << "\n";
+        /*
+        Get and Provide information from the header that was not available before Header mmap()
+        */
+        if (!readonly) {
+            this->header->size = this->message_size;
+        } else {
+            this->message_size = this->header->size;
+        }
+        
+        /*
+        Map Buffer
+        
+        nmap is split into 2 separate calls so that it is not possible to enter the Header address space from the buffer without Seg Falt
+        */
+        if (this->full_size - HEADER_SIZE != 0) {
+            this->buffer = (uint8_t *) mmap(NULL, this->full_size - HEADER_SIZE, 
+                readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
+                MAP_SHARED, this->dma_buf_fd, 0
+            );
+            if (this->buffer == MAP_FAILED) {
+                std::cerr << "dma_buff mmap body_mem failed, fd: " << this->dma_buf_fd << "\n";
                 raise(SIGSEGV);
             }
-            this->buffer = static_cast<uint8_t *>(body_mem);
         }
     }
 
-    int DMABuffer::get_fd() {
-        return this->fd;
+    int DMABuffer::fd() {
+        return this->dma_buf_fd;
     }
 
-    size_t DMABuffer::get_size() {
-        return this->size - HEADER_SIZE;
+    size_t DMABuffer::size() {
+        return this->header->size;
     }
 
     std::string DMABuffer::get_heap_name() {

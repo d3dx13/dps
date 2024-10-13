@@ -16,18 +16,15 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    dps::DMABuffer dma1;
-    dps::DMABuffer dma2;
-
     int temp;
     int pid = 24873;
 
     cout << "pid " << getpid() << "\n";
 
-    dma1.connect(pid, 9);
-    dma2.connect(pid, 10);
-    int fd1 = dma1.get_fd();
-    int fd2 = dma2.get_fd();
+    dps::DMABuffer dma1(pid, 9);
+    dps::DMABuffer dma2(pid, 10);
+    int fd1 = dma1.fd();
+    int fd2 = dma2.fd();
 
     int epfd;
     struct epoll_event ev;

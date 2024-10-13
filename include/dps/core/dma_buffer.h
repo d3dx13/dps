@@ -2,26 +2,21 @@
 
 namespace dps {
     struct dma_buffer_header {
-        size_t size; // TODO support
+        size_t size;
         unsigned long msg_id;
         // TODO add supported sync flags
     };
 
     class DMABuffer {
         public:
-            DMABuffer();
+            DMABuffer(size_t size, std::string heap_name, std::string buffer_name);
+            DMABuffer(int pid, int fd);
             ~DMABuffer();
-
-            void allocate(size_t size, std::string heap_name, std::string buffer_name);
-            void connect(int pid, int fd);
-            void release();
-
-            void map();
-            void unmap();
             
-            int get_fd();
+            int fd();
+            size_t size();
+
             std::unique_ptr<uint8_t> get_buffer();
-            size_t get_size();
             std::string get_heap_name();
             std::string get_buffer_name();
 
@@ -29,11 +24,20 @@ namespace dps {
             dma_buffer_header * header;
         
         protected:
-            size_t size;
+            void allocate(size_t size, std::string heap_name, std::string buffer_name);
+            void connect(int pid, int fd);
+            void release();
+
+            void map(bool readonly);
+            void unmap();
+
+            size_t full_size;
+            size_t message_size;
+
             std::string heap_name;
             std::string buffer_name;
 
-            int fd = -1;
+            int dma_buf_fd = -1;
 
             void update_buffer_info();
 

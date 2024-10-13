@@ -7,8 +7,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    dps::DMABuffer dma;
-
     int temp;
     int pid;
     int fd;
@@ -17,15 +15,13 @@ int main(int argc, char *argv[])
     cin >> pid;
     cin >> fd;
 
-    dma.connect(pid, fd);
-    cout << "Size: " << dma.get_size() << "\n";
-    dma.map();
+    dps::DMABuffer dma(pid, fd);
+    cout << "Size: " << dma.size() << "\n";
     cout << "dma.header->msg_id: " << dma.header->msg_id << "\n";
-    for (int i = 0; i < dma.get_size(); i++){
+    for (int i = 0; i < dma.size(); i++){
         cout << (int) dma.buffer[i] << ", ";
     }
     cout << "\n";
-    
     
     system(("cat /proc/" + to_string(getpid()) + "/fdinfo/*").c_str());
 
