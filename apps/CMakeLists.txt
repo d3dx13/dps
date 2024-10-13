@@ -9,3 +9,7 @@ target_link_libraries(create_dma_buffer PRIVATE dps)
 add_executable(open_dma_buffer open_dma_buffer.cpp)
 target_compile_features(open_dma_buffer PRIVATE cxx_std_17)
 target_link_libraries(open_dma_buffer PRIVATE dps)
+
+add_executable(epoll_dma_buffer epoll_dma_buffer.cpp)
+target_compile_features(epoll_dma_buffer PRIVATE cxx_std_17)
+target_link_libraries(epoll_dma_buffer PRIVATE dps)

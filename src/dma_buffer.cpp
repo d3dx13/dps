@@ -1,6 +1,27 @@
 #include "dps/core/config.h"
 #include "dps/core/dma_buffer.h"
 
+
+// trim from start (in place)
+inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+inline void trim(std::string &s) {
+    rtrim(s);
+    ltrim(s);
+}
+
 namespace dps {
     DMABuffer::DMABuffer() {
 
@@ -24,7 +45,7 @@ namespace dps {
         Allocate DMA Buffer with size != 0
         */
         struct dma_heap_allocation_data heap_data = {};
-        heap_data.len = size;
+        heap_data.len = HEADER_SIZE + size;
         heap_data.fd_flags = O_RDWR | O_CLOEXEC;
         if (ioctl(heap_fd, DMA_HEAP_IOCTL_ALLOC, &heap_data) != 0) {
             std::cerr << "dma heap alloc failed, len: " << heap_data.len << "\n";
@@ -44,33 +65,8 @@ namespace dps {
             std::cerr << "dma buf rename failed, name: " << dma_buf_name << "\n";
         }
 
-        /*
-        Save class variables
-        */
         this->fd = heap_data.fd;
-        this->heap_name = heap_name;
-        this->buffer_name = std::string(dma_buf_name);
-        this->size = size;
-    }
-
-    // trim from start (in place)
-    inline void ltrim(std::string &s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-            return !std::isspace(ch);
-        }));
-    }
-
-    // trim from end (in place)
-    inline void rtrim(std::string &s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-            return !std::isspace(ch);
-        }).base(), s.end());
-    }
-
-    // trim from both ends (in place)
-    inline void trim(std::string &s) {
-        rtrim(s);
-        ltrim(s);
+        this->update_buffer_info();
     }
 
     void DMABuffer::connect(int pid, int fd) {
@@ -93,13 +89,18 @@ namespace dps {
         }
         close(pid_fd);
 
+        this->fd = dma_buf_fd;
+        this->update_buffer_info();
+    }
+
+    void DMABuffer::update_buffer_info() {
         /*
         Read DMA Buffer public information
         */
         std::string heap_name = "";
         std::string buffer_name = "";
         size_t size = 0;
-        std::ifstream fd_info("/proc/self/fdinfo/" + std::to_string(dma_buf_fd));
+        std::ifstream fd_info("/proc/self/fdinfo/" + std::to_string(this->fd));
         if(!fd_info.good()){
             std::cerr << "read fdinfo failed: " << fd << "\n";
             raise(SIGSEGV);
@@ -132,7 +133,6 @@ namespace dps {
         /*
         Save class variables
         */
-        this->fd = dma_buf_fd;
         this->heap_name = heap_name;
         this->buffer_name = buffer_name;
         this->size = size;
@@ -151,7 +151,38 @@ namespace dps {
         }
     }
 
-    int DMABuffer::get_fd(){
+    void DMABuffer::map() {
+        // TODO make this shit unmappable
+        void *header_mem = mmap(NULL, HEADER_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, this->fd, this->size - HEADER_SIZE);
+        if (header_mem == MAP_FAILED) {
+            std::cerr << "dma_buff mmap header_mem failed, fd: " << this->fd << "\n";
+            raise(SIGSEGV);
+        }
+        this->header = static_cast<dma_buffer_header *>(header_mem);
+        if (this->size - HEADER_SIZE != 0) {
+            // TODO make this shit unmappable 2
+            void *body_mem = mmap(NULL, this->size - HEADER_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, this->fd, 0);
+            if (body_mem == MAP_FAILED) {
+                std::cerr << "dma_buff mmap body_mem failed, fd: " << this->fd << "\n";
+                raise(SIGSEGV);
+            }
+            this->buffer = static_cast<uint8_t *>(body_mem);
+        }
+    }
+
+    int DMABuffer::get_fd() {
         return this->fd;
+    }
+
+    size_t DMABuffer::get_size() {
+        return this->size - HEADER_SIZE;
+    }
+
+    std::string DMABuffer::get_heap_name() {
+        return this->heap_name;
+    }
+
+    std::string DMABuffer::get_buffer_name() {
+        return this->buffer_name;
     }
 }
