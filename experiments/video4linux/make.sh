@@ -1,0 +1,1 @@
+g++ -o dmabuf-v4l2 dmabuf-v4l2.c $(pkg-config opencv4 --cflags --libs)

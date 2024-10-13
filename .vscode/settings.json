@@ -89,6 +89,9 @@
         "expected": "cpp",
         "spanstream": "cpp",
         "stacktrace": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "videodev2.h": "c",
+        "stddef.h": "c",
+        "fcntl.h": "c"
     }
 }
