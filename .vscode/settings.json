@@ -92,6 +92,7 @@
         "filesystem": "cpp",
         "videodev2.h": "c",
         "stddef.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "queue": "cpp"
     }
 }

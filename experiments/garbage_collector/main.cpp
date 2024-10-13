@@ -6,18 +6,17 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <memory>
-#include <list>
-#include <any>
+#include <queue>
 
 using namespace std;
 
 class SimpleClass {
     public:
         SimpleClass(string name) : name(name){
-            cout << "Create" << name << "\n";
+            cout << "Create " << name << "\n";
         }
         ~SimpleClass() {
-            cout << "Destroy" << name << "\n";
+            cout << "Destroy " << name << "\n";
         }
     
     protected:
@@ -30,8 +29,6 @@ class SimpleContainer {
             for (int i = SIGHUP; i <= SIGTERM; i++){
                 signal(i, signalHandler);
             }
-            std::cout << "__node__ " << __node__ << "\n";
-
             if (__node__ == NULL) {
                 __node__ = this;
             } else {
@@ -42,35 +39,36 @@ class SimpleContainer {
 
         ~SimpleContainer() {
             cout << "SimpleContainer DIE\n";
-            
-            for (auto it = this->__cls__.begin(); it != this->__cls__.end(); it++) {
-                it->get()->~SimpleClass();
+            while (!this->__cls__.empty()) {
+                this->__cls__.front().get()->~SimpleClass();
+                this->__cls__.pop();
             }
-            
-            exit(0);
+            cout << "SimpleContainer DEAD\n";
         }
 
         shared_ptr<SimpleClass> anonce(string name) {
             shared_ptr<SimpleClass> cls;
             cls = make_shared<SimpleClass>(name);
 
-            this->__cls__.push_back(cls);
+            this->__cls__.push(cls);
 
             return cls;
         }
 
         static void signalHandler(int signum) {
-            if (signum > 0) {
-                std::cout << "Interrupt signal (" << signum << ") received, pid " << getpid() << "\n";
-            } else {
-                std::cout << "Calling Node Destructor, pid " << getpid() << "\n";
+            std::cout << "Interrupt signal (" << signum << ") received, pid " << getpid() << "\n";
+            if (__node__ != NULL) {
+                __node__->~SimpleContainer();
+                __node__ = NULL;
+                for (int i = SIGHUP; i <= SIGTERM; i++){
+                    signal(i, SIG_DFL);
+                }
+                raise(signum);
             }
-
-            __node__->~SimpleContainer();
         };
     
     protected:
-        list<shared_ptr<SimpleClass>> __cls__;
+        queue<shared_ptr<SimpleClass>> __cls__;
 
     private:
         static SimpleContainer * __node__;
@@ -82,9 +80,22 @@ class SimpleContainerChild : public SimpleContainer {
     public:
         SimpleContainerChild() : SimpleContainer() {
             t42 = this->anonce("t42");
+
+            size_t SIZE = 1024 * 1024 * 1024;
+            BIG.resize(SIZE);
+            for (size_t i = 0; i < SIZE; i++) {
+                BIG[i] = i;
+            }
+            cout << "malloc\n";
+
+            this->temp = make_unique<SimpleClass>("WOW");
         }
-    
-    shared_ptr<SimpleClass> t42;
+
+        std::vector<char> BIG;
+
+        unique_ptr<SimpleClass> temp;
+
+        shared_ptr<SimpleClass> t42;
 };
 
 int main(int argc, char *argv[])
@@ -94,11 +105,12 @@ int main(int argc, char *argv[])
     shared_ptr<SimpleClass> t1 = container.anonce("t1");
     shared_ptr<SimpleClass> t2 = container.anonce("t2");
     shared_ptr<SimpleClass> t3 = container.anonce("t3");
-
+    
     for (;;){
         usleep(1000);
     }
 
-    raise(SIGSEGV);
+    // raise(SIGSEGV);
+    cout << "END PROGRAM\n";
     return 0;
 }
