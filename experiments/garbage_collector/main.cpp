@@ -111,6 +111,5 @@ int main(int argc, char *argv[])
     }
 
     // raise(SIGSEGV);
-    cout << "END PROGRAM\n";
     return 0;
 }

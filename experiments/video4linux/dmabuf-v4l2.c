@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
   struct arguments_t args;
   int dmabuf_heap_fd;
   unsigned int loop_count;
-  const int num_buffers = 30;
+  const int num_buffers = 3;
   int v4l2_fd;
   struct v4l2_pix_format pix_fmt;
   bool mplane_api;
@@ -434,7 +434,9 @@ int main(int argc, char *argv[])
     buf_index = buf.index;
 
     /* prepare buffer for CPU access */
-    dmabuf_sync_start(dmabuf_fds[buf_index]);
+    // dmabuf_sync_start(dmabuf_fds[buf_index]);
+
+    std::cout << "buf_index = " << buf_index << "\n";
     
     int rc;
     unsigned int offset, length;
@@ -477,11 +479,11 @@ int main(int argc, char *argv[])
     Mat yuv_bluat_rgb;
     cvtColor(yuv_bluat, yuv_bluat_rgb, COLOR_YUV2BGR_NV12);
     imshow("yuv_bluat", yuv_bluat);
-    imshow("yuv_bluat_rgb", yuv_bluat_rgb);
+    imshow("yuv_bluat_rgb" + std::to_string(buf_index), yuv_bluat_rgb);
     int k = waitKey(1); // Wait for a keystroke in the window
 
     /* release buffer for CPU access */
-    dmabuf_sync_stop(dmabuf_fds[buf_index]);
+    // dmabuf_sync_stop(dmabuf_fds[buf_index]);
 
     /* enqueue a buffer */
     memset(&buf, 0, sizeof(buf));

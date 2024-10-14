@@ -23,14 +23,19 @@ inline void trim(std::string &s) {
 }
 
 namespace dps {
-    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name) {
+    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_name) :
+        file_name(file_name) {
         this->allocate(size, heap_name, buffer_name);
         this->map(false);
+        this->create_file();
     }
 
     DMABuffer::DMABuffer(int pid, int fd) {
+        DMABuffer(pid, fd, true);
+    }
+    DMABuffer::DMABuffer(int pid, int fd, bool readonly) {
         this->connect(pid, fd);
-        this->map(true);
+        this->map(readonly);
     }
 
     DMABuffer::~DMABuffer() {
@@ -156,6 +161,11 @@ namespace dps {
         unmap memory
         */
         this->unmap();
+
+        /*
+        Remove file association
+        */
+        this->delete_file();
         
         /*
         Reset local variables to default
@@ -164,6 +174,7 @@ namespace dps {
         this->full_size = 0;
         this->heap_name = "";
         this->buffer_name = "";
+        this->file_name = "";
     }
 
     void DMABuffer::map(bool readonly) {
@@ -216,6 +227,21 @@ namespace dps {
             munmap(this->_buffer, this->full_size - PAGE_SIZE);
         }
         this->_buffer = nullptr;
+    }
+
+    void DMABuffer::create_file() {
+        this->file_path = std::filesystem::path(this->file_name);
+
+        if (!std::filesystem::exists(this->file_path.parent_path()) or !std::filesystem::is_directory(this->file_path.parent_path())){
+            std::cout << "Creating topics_path\n";
+            std::filesystem::create_directories(this->file_path.parent_path());
+        }
+
+        std::ofstream {this->file_path};
+    }
+
+    void DMABuffer::delete_file() {
+        std::filesystem::remove(this->file_path);
     }
 
     int DMABuffer::fd() {
