@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
   args.output_dir = "/tmp";
   args.width = 640;
   args.height = 480;
-  args.fourcc = 0;
+  args.fourcc = v4l2_fourcc('Y', 'U', 'Y', 'V');
   // #define V4L2_PIX_FMT_YUYV    v4l2_fourcc('Y', 'U', 'Y', 'V') /* 16  YUV 4:2:2     */
 
   if(parse_arguments(argc, argv, &args) < 0)
