@@ -1,0 +1,1 @@
+g++ capture.c -luvc -o capture $(pkg-config opencv4 --cflags --libs)
