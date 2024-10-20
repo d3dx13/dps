@@ -1,45 +1,46 @@
-#include "dps/core/config.h"
+#include "dps/core/common.h"
 #include "dps/core/dma_buffer.h"
 
-
-// trim from start (in place)
-inline void ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-        return !std::isspace(ch);
-    }));
-}
-
-// trim from end (in place)
-inline void rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-        return !std::isspace(ch);
-    }).base(), s.end());
-}
-
-// trim from both ends (in place)
-inline void trim(std::string &s) {
-    rtrim(s);
-    ltrim(s);
-}
-
 namespace dps {
-    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_name) :
-        file_name(file_name) {
-        this->allocate(size, heap_name, buffer_name);
-        this->map(false);
+    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_association_name) : DMABuffer(size, heap_name, buffer_name) {
+        this->file_association_name = file_association_name;
         this->create_file();
     }
-
-    DMABuffer::DMABuffer(int pid, int fd) {
-        DMABuffer(pid, fd, true);
+    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name) {
+        this->allocate(size, heap_name, buffer_name);
+        this->map(false);
     }
+
+    DMABuffer::DMABuffer(int pid, int fd) : DMABuffer(pid, fd, true) {}
     DMABuffer::DMABuffer(int pid, int fd, bool readonly) {
         this->connect(pid, fd);
         this->map(readonly);
     }
 
     DMABuffer::~DMABuffer() {
-        this->release();
+        /*
+        Close dma_buff
+        */
+        close(this->dma_buf_fd);
+        this->dma_buf_fd = -1;
+
+        /*
+        unmap memory
+        */
+        this->unmap();
+
+        /*
+        Remove file association
+        */
+        this->delete_file();
+        
+        /*
+        Reset local variables to default
+        */
+        this->message_size = 0;
+        this->full_size = 0;
+        this->heap_name = "";
+        this->buffer_name = "";
     }
 
     void DMABuffer::allocate(size_t size, std::string heap_name, std::string buffer_name){
@@ -121,8 +122,8 @@ namespace dps {
         while (std::getline(fd_info, line)) {
             std::string field_name = line.substr(0, line.find(':'));
             std::string field_value = line.substr(line.find(':') + 1);
-            trim(field_name);
-            trim(field_value);
+            dps_common::trim(field_name);
+            dps_common::trim(field_value);
 
             if (field_name.find("size") == 0) {
                 size = std::stoul(field_value);
@@ -148,33 +149,6 @@ namespace dps {
         this->heap_name = heap_name;
         this->buffer_name = buffer_name;
         this->full_size = size;
-    }
-
-    void DMABuffer::release() {
-        /*
-        Close dma_buff
-        */
-        close(this->dma_buf_fd);
-        this->dma_buf_fd = -1;
-
-        /*
-        unmap memory
-        */
-        this->unmap();
-
-        /*
-        Remove file association
-        */
-        this->delete_file();
-        
-        /*
-        Reset local variables to default
-        */
-        this->message_size = 0;
-        this->full_size = 0;
-        this->heap_name = "";
-        this->buffer_name = "";
-        this->file_name = "";
     }
 
     void DMABuffer::map(bool readonly) {
@@ -230,18 +204,20 @@ namespace dps {
     }
 
     void DMABuffer::create_file() {
-        this->file_path = std::filesystem::path(this->file_name);
+        this->file_association_path = std::filesystem::path(this->file_association_name);
 
-        if (!std::filesystem::exists(this->file_path.parent_path()) or !std::filesystem::is_directory(this->file_path.parent_path())){
-            std::cout << "Creating topics_path\n";
-            std::filesystem::create_directories(this->file_path.parent_path());
+        if (!std::filesystem::exists(this->file_association_path.parent_path()) or !std::filesystem::is_directory(this->file_association_path.parent_path())) {
+            std::filesystem::create_directories(this->file_association_path.parent_path());
         }
 
-        std::ofstream {this->file_path};
+        std::ofstream {this->file_association_path};
     }
 
     void DMABuffer::delete_file() {
-        std::filesystem::remove(this->file_path);
+        if (this->file_association_name.length() > 0) {
+            std::filesystem::remove(this->file_association_path);
+            this->file_association_name = "";
+        }
     }
 
     int DMABuffer::fd() {

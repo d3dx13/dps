@@ -1,9 +1,9 @@
-#include "dps/core/config.h"
+#include "dps/core/common.h"
 #include "dps/core/base_publisher.h"
 
 namespace dps {
     BasePublisher::BasePublisher(std::string topic_name, size_t message_size, int queue_size, std::string heap_name) 
-    : message_size(message_size), queue_size(queue_size), heap_name(heap_name), topic_name(simplify_topic_name(topic_name)) {
+    : message_size(message_size), queue_size(queue_size), heap_name(heap_name), topic_name(dps_common::simplify_topic_name(topic_name)) {
         std::cout << "New Pub" << topic_name << " : " << message_size << " : " << queue_size << " : " << heap_name << "\n";
 
         this->topic_path = this->init_filesystem();
@@ -23,16 +23,6 @@ namespace dps {
 
     void BasePublisher::publish(){
         
-    }
-
-    std::string BasePublisher::simplify_topic_name(std::string topic_name) {
-        int start_index;
-        for (start_index = 0; start_index < topic_name.length(); start_index++) {
-            if (topic_name[start_index] != '/') {
-                break;
-            }
-        }
-        return topic_name.substr(start_index);
     }
 
     std::filesystem::path BasePublisher::init_filesystem(){

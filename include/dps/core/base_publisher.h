@@ -1,4 +1,4 @@
-#include "dps/core/config.h"
+#include "dps/core/common.h"
 
 namespace dps {
     class BasePublisher {
@@ -26,8 +26,6 @@ namespace dps {
             std::vector<int> allocated_dma_bufs_fd;
 
         private:
-            std::string simplify_topic_name(std::string topic_name);
-        
             std::filesystem::path init_filesystem();
             void cleanup_filesystem();
 

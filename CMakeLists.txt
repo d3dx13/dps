@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(dps LANGUAGES CXX C)
 
+set(CMAKE_CXX_FLAGS "-O3")
+
 ############################################################
 # Create a library
 ############################################################

@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     int temp;
 
-    dps::DMABuffer dma(64 - 1, "system", "some stupid buffer", "/dev/shm/.ips/topic/test/.wow");
+    dps::DMABuffer dma(64 - 1, "system", "some stupid buffer", "/dev/shm/test_file"); // , "/dev/shm/test_file"
     system("tree -a /dev/shm/");
     cout << "Size: " << dma.size() << "\n";
     cout << "pid " << getpid() << "\n";
@@ -23,11 +23,13 @@ int main(int argc, char *argv[])
         cout << (int) dma.buffer()[i] << ", ";
     }
 
-    // dma.~DMABuffer();
-    
-    system(("cat /proc/" + to_string(getpid()) + "/fdinfo/*").c_str());
-
     cin >> temp;
+
+    system("tree -a /dev/shm/");
+    dma.~DMABuffer();
+    system("tree -a /dev/shm/");
+    
+    // system(("cat /proc/" + to_string(getpid()) + "/fdinfo/*").c_str());
     
     return 0;
 }

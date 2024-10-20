@@ -1,4 +1,4 @@
-#include "dps/core/config.h"
+#include "dps/core/common.h"
 
 namespace dps {
     struct dma_buffer_header {
@@ -9,7 +9,8 @@ namespace dps {
 
     class DMABuffer {
         public:
-            DMABuffer(size_t size, std::string heap_name, std::string buffer_name); // , std::string file_name -> @{pid}:fd:index:max_index
+            DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_association_name);
+            DMABuffer(size_t size, std::string heap_name, std::string buffer_name);
             DMABuffer(int pid, int fd, bool readonly);
             DMABuffer(int pid, int fd);
             ~DMABuffer();
@@ -25,7 +26,6 @@ namespace dps {
         protected:
             void allocate(size_t size, std::string heap_name, std::string buffer_name);
             void connect(int pid, int fd);
-            void release();
             void create_file(); // TODO
 
             void map(bool readonly);
@@ -37,8 +37,8 @@ namespace dps {
 
             std::string heap_name;
             std::string buffer_name;
-            std::string file_name;
-            std::filesystem::path file_path;
+            std::string file_association_name;
+            std::filesystem::path file_association_path;
 
             int dma_buf_fd = -1;
             uint8_t * _buffer;

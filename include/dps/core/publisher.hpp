@@ -1,4 +1,4 @@
-#include "dps/core/config.h"
+#include "dps/core/common.h"
 
 namespace dps {
     template <typename MessageT>
