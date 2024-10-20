@@ -22,5 +22,6 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 int borrow_fd_from_pid(int pid, int fd);

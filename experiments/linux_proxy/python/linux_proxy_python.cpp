@@ -82,7 +82,6 @@ static PyObject *py_inotify_rm_watch(PyObject *self, PyObject *args) {
 }
 
 #define EVENT_SIZE  sizeof(struct inotify_event)
-#define BUF_LEN 100000
 static PyObject *py_inotify_event_read(PyObject *self, PyObject *args) {
   int fd;
   if (PyTuple_Size(args) != 1) {
@@ -90,16 +89,40 @@ static PyObject *py_inotify_event_read(PyObject *self, PyObject *args) {
   }
   PyArg_ParseTuple(args, "i", &fd);
 
+  int n;
+  ioctl(fd, FIONREAD, &n);
+  if (n == 0) {
+      return Py_BuildValue("i", n);
+  }
+  printf( "n %i\n", n );
+
   int length, i = 0, wd;
-  char buffer[BUF_LEN];
+  char* buffer = new char [n];
 
   i = 0;
   /* высчитываем размер файлового дескриптора*/
-  length = read( fd, buffer, BUF_LEN );
-  printf( "length %i\n", length );
+  length = read( fd, buffer, n );
   if ( length < 0 ) {
-      perror( "read" );
+      // perror( "read" );
+      delete[] buffer;
+      return Py_BuildValue("i", length);
   }
+  printf( "length %i\n", length );
+  while ( i < length ) {
+    struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
+    if ( event->len ) {
+        if ( event->mask == IN_CREATE) {
+            printf( "The file %s was created with WD %d\n", event->name, event->wd );
+        } else if ( event->mask == IN_DELETE) {
+            printf( "The file %s was deleted with WD %d\n", event->name, event->wd );
+        }
+        i += EVENT_SIZE + event->len;
+    } else {
+      i += EVENT_SIZE;
+      continue;
+    }
+  }
+  /*
   while ( i < length ) {
     struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
     printf( "i %i \n" );
@@ -141,8 +164,10 @@ static PyObject *py_inotify_event_read(PyObject *self, PyObject *args) {
       continue;
     }
   }
+  */
   // int ret = read(fd, buff, sizeof(buff));
   // return Py_BuildValue("y", buff);
+  delete[] buffer;
   return Py_BuildValue("i", length);
 }
 

@@ -1,15 +1,11 @@
 import sys
 
-sys.path.append("/home/d3dx13/workspace/ips/experiments/dma_proxy/build/lib.linux-x86_64-3.10")
-sys.path.append("/home/d3dx13/workspace/ips/experiments/dma_proxy/build/lib.linux-aarch64-cpython-311")
-sys.path.append("/home/d3dx13/workspace/ips/experiments/dma_proxy/build/lib.linux-x86_64-cpython-310")
-sys.path.append("/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-x86_64-3.10")
-sys.path.append("/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-aarch64-cpython-311")
-sys.path.append("/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-x86_64-cpython-310")
+sys.path.append("/home/d3dx13/workspace/dps/experiments/linux_proxy/build/lib.linux-x86_64-3.10")
+sys.path.append("/home/d3dx13/workspace/dps/experiments/linux_proxy/build/lib.linux-aarch64-cpython-311")
+sys.path.append("/home/d3dx13/workspace/dps/experiments/linux_proxy/build/lib.linux-x86_64-cpython-310")
 
 import os
 from time import sleep, monotonic
-import dma_proxy
 import linux_proxy
 import mmap
 import datetime
@@ -69,7 +65,7 @@ paths = [
     "/dev/shm/.dps/topic/image",
 ]
 
-inotify_fd = linux_proxy.inotify_init1(0)
+inotify_fd = linux_proxy.inotify_init1(IN_NONBLOCK)
 print("inotify_fd", inotify_fd)
 for path_str in paths:
     print(path_str)
@@ -79,6 +75,7 @@ for fd in fds:
     print(fd)
     event.register(fd=fd)
 
+"""
 while True:
     events = event.poll()
     print()
@@ -88,3 +85,10 @@ while True:
             if fd == event_pair[0]:
                 temp = linux_proxy.inotify_event_read(inotify_fd)
                 print("HALP", event_pair, fd, temp)
+"""
+
+while True:
+    sleep(0.01)
+    temp = linux_proxy.inotify_event_read(inotify_fd)
+    if temp > 0:
+        print("HALP", temp)
