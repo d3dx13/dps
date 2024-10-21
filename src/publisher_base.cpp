@@ -21,7 +21,8 @@ namespace dps {
 
         // TODO remove
         for (int queue_id = 0; queue_id < this->dma_buffers.size(); queue_id++) {
-            std::cout << "fd: " << this->dma_buffers[queue_id].get()->fd() << "\n";
+            std::cout << "fd: " << this->dma_buffers[queue_id].get()->fd();
+            std::cout << ", msg_id: " << this->dma_buffers[queue_id].get()->header()->msg_id << "\n";
         }
     }
 
