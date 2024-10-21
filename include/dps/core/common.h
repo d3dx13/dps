@@ -17,16 +17,20 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+#include <sys/resource.h>
 #include <sys/syscall.h>
 
+#define RLIMIT_NOFILE_MAX 1048576
 #define PAGE_SIZE 4096
 #define DMA_HEAP_PATH "/dev/dma_heap/"
 
-#define DPS_BASE_PATH "/dev/shm/.dps"
+#define DPS_BASE_PATH "/dev/shm/.dps/"
+#define DPS_SUB_PATH "sub"
+#define DPS_PUB_PATH "pub"
 #define DPS_TOPIC_PATH "topic"
 #define DPS_NODE_PATH "node"
 
-#define DPS_TOPIC_SEPARATOR ':'
+#define DPS_TOPIC_SERVICE_CHARACER '\\'
 
 namespace dps_common {
     // trim from start (in place)
@@ -50,13 +54,32 @@ namespace dps_common {
     }
 
     static std::string simplify_topic_name(std::string topic_name) {
-        int start_index;
-        for (start_index = 0; start_index < topic_name.length(); start_index++) {
-            if (topic_name[start_index] != '/') {
-                break;
+        std::string topic_name_new;
+        bool once_slash = false;
+        for (int index = 0; index < topic_name.length(); index++) {
+            if (topic_name[index] == DPS_TOPIC_SERVICE_CHARACER) {
+                continue;
+            }
+            if (topic_name[index] == '/') {
+                if (!once_slash && topic_name_new.length() > 0) {
+                    topic_name_new += topic_name[index];
+                }
+                once_slash = true;
+            } else {
+                topic_name_new += topic_name[index];
+                once_slash = false;
             }
         }
-        return topic_name.substr(start_index);
+        if (topic_name_new[topic_name_new.length() - 1] == '/') {
+            topic_name_new.pop_back();
+        }
+        return topic_name_new;
+    }
+
+    static void unleash() {
+        // Remove limit on opened file descriptors
+        rlimit rlimit_nofile {RLIMIT_NOFILE_MAX, RLIMIT_NOFILE_MAX};
+        setrlimit(RLIMIT_NOFILE, &rlimit_nofile);
     }
 }
 

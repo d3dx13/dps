@@ -11,10 +11,8 @@ set(CMAKE_CXX_FLAGS "-O3")
 #Generate the shared library from the library sources
 
 set(SHARED_CPP_FILES 
-    src/node.cpp
     src/dma_buffer.cpp
-    src/base_publisher.cpp
-    include/dps/core/publisher.hpp
+    src/publisher_base.cpp
 )
 
 # set(SRC_CPP_FILES 

@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     int temp;
 
-    dps::DMABuffer dma(64 - 1, "system", "some stupid buffer", "/dev/shm/test_file"); // , "/dev/shm/test_file"
+    dps::DMABuffer dma(64 - 1, "system", "some stupid buffer", "/dev/shm/test_file", 0, 1); // , "/dev/shm/test_file"
     system("tree -a /dev/shm/");
     cout << "Size: " << dma.size() << "\n";
     cout << "pid " << getpid() << "\n";

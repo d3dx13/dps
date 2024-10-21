@@ -1,3 +1,6 @@
+#ifndef DMA_BUFFER_H
+#define DMA_BUFFER_H
+
 #include "dps/core/common.h"
 
 namespace dps {
@@ -9,7 +12,7 @@ namespace dps {
 
     class DMABuffer {
         public:
-            DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_association_name);
+            DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_association_folder, int buffer_index, int buffer_index_max);
             DMABuffer(size_t size, std::string heap_name, std::string buffer_name);
             DMABuffer(int pid, int fd, bool readonly);
             DMABuffer(int pid, int fd);
@@ -37,8 +40,11 @@ namespace dps {
 
             std::string heap_name;
             std::string buffer_name;
-            std::string file_association_name;
+
             std::filesystem::path file_association_path;
+            std::string file_association_folder;
+            int buffer_index;
+            int buffer_index_max;
 
             int dma_buf_fd = -1;
             uint8_t * _buffer;
@@ -49,3 +55,5 @@ namespace dps {
             const int pid = getpid();
     };
 }
+
+#endif

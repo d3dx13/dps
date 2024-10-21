@@ -2,8 +2,10 @@
 #include "dps/core/dma_buffer.h"
 
 namespace dps {
-    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_association_name) : DMABuffer(size, heap_name, buffer_name) {
-        this->file_association_name = file_association_name;
+    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_association_folder, int buffer_index, int buffer_index_max) : DMABuffer(size, heap_name, buffer_name) {
+        this->file_association_folder = file_association_folder;
+        this->buffer_index = buffer_index;
+        this->buffer_index_max = buffer_index_max;
         this->create_file();
     }
     DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name) {
@@ -204,19 +206,25 @@ namespace dps {
     }
 
     void DMABuffer::create_file() {
-        this->file_association_path = std::filesystem::path(this->file_association_name);
+        this->file_association_path = std::filesystem::path(this->file_association_folder);
 
-        if (!std::filesystem::exists(this->file_association_path.parent_path()) or !std::filesystem::is_directory(this->file_association_path.parent_path())) {
-            std::filesystem::create_directories(this->file_association_path.parent_path());
+        if (!std::filesystem::exists(this->file_association_path) or !std::filesystem::is_directory(this->file_association_path)) {
+            std::filesystem::create_directories(this->file_association_path);
         }
+
+        std::string buffer_name = DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->pid) +
+                DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->dma_buf_fd) + 
+                DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->buffer_index) + 
+                DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->buffer_index_max);
+        this->file_association_path = this->file_association_path / buffer_name;
 
         std::ofstream {this->file_association_path};
     }
 
     void DMABuffer::delete_file() {
-        if (this->file_association_name.length() > 0) {
+        if (this->file_association_folder.length() > 0) {
             std::filesystem::remove(this->file_association_path);
-            this->file_association_name = "";
+            this->file_association_folder = "";
         }
     }
 
