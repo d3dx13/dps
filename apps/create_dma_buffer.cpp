@@ -9,17 +9,16 @@ int main(int argc, char *argv[])
 {
     int temp;
 
-    dps::DMABuffer dma(64 - 1, "system", "some stupid buffer", "/dev/shm/test_file", 0, 1); // , "/dev/shm/test_file"
+    dps::DMABuffer dma(64 - 1, "system", "some stupid buffer");
     system("tree -a /dev/shm/");
     cout << "Size: " << dma.size() << "\n";
     cout << "pid " << getpid() << "\n";
     cout << "fd " << dma.fd() << "\n";
     cout << "\n";
-    for (int i = 0; i < dma.size(); i++){
+    for (int i = 0; i < 100; i++){
         dma.buffer()[i] = (uint8_t)(200 - i);
-        dma.header()->msg_id += 1;
     }
-    for (int i = 0; i < dma.size(); i++){
+    for (int i = 0; i < 100; i++){
         cout << (int) dma.buffer()[i] << ", ";
     }
 

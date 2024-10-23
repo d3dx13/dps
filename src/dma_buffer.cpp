@@ -2,12 +2,6 @@
 #include "dps/core/dma_buffer.h"
 
 namespace dps {
-    DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name, std::string file_association_folder, int buffer_index, int buffer_index_max) : DMABuffer(size, heap_name, buffer_name) {
-        this->file_association_folder = file_association_folder;
-        this->buffer_index = buffer_index;
-        this->buffer_index_max = buffer_index_max;
-        this->create_file();
-    }
     DMABuffer::DMABuffer(size_t size, std::string heap_name, std::string buffer_name) {
         this->allocate(size, heap_name, buffer_name);
         this->map(false);
@@ -30,17 +24,11 @@ namespace dps {
         unmap memory
         */
         this->unmap();
-
-        /*
-        Remove file association
-        */
-        this->delete_file();
         
         /*
         Reset local variables to default
         */
-        this->message_size = 0;
-        this->full_size = 0;
+        this->_size = 0;
         this->heap_name = "";
         this->buffer_name = "";
     }
@@ -59,7 +47,7 @@ namespace dps {
         Allocate DMA Buffer with size != 0
         */
         struct dma_heap_allocation_data heap_data = {};
-        heap_data.len = PAGE_SIZE + size;
+        heap_data.len = size;
         heap_data.fd_flags = O_RDWR | O_CLOEXEC;
         if (ioctl(heap_fd, DMA_HEAP_IOCTL_ALLOC, &heap_data) != 0) {
             std::cerr << "dma heap alloc failed, len: " << heap_data.len << "\n";
@@ -79,7 +67,6 @@ namespace dps {
             std::cerr << "dma buf rename failed, name: " << dma_buf_name << "\n";
         }
 
-        this->message_size = size;
         this->dma_buf_fd = heap_data.fd;
         this->update_buffer_info();
     }
@@ -150,82 +137,30 @@ namespace dps {
         */
         this->heap_name = heap_name;
         this->buffer_name = buffer_name;
-        this->full_size = size;
+        this->_size = size;
     }
 
     void DMABuffer::map(bool readonly) {
-        /*
-        Map Header
-
-        Since we can't always control the offset in memory when we pass dma_buff to the driver, 
-        the header is placed as an additional PAGE of 4096 bytes at the end of the buffer. 
-        */
-        this->_header = (dma_buffer_header *) mmap(NULL, PAGE_SIZE, 
-            readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
-            MAP_SHARED, this->dma_buf_fd, this->full_size - PAGE_SIZE
-        );
-        if (this->_header == MAP_FAILED) {
-            std::cerr << "dma_buff mmap header_mem failed, fd: " << this->dma_buf_fd << "\n";
-            raise(SIGSEGV);
-        }
-        /*
-        Get and Provide information from the header that was not available before Header mmap()
-        */
-        if (!readonly) {
-            this->_header->size = this->message_size;
-        } else {
-            this->message_size = this->_header->size;
-        }
-        
         /*
         Map Buffer
         
         nmap is split into 2 separate calls so that it is not possible to enter the Header address space from the buffer without Seg Falt
         */
-        if (this->full_size - PAGE_SIZE != 0) {
-            this->_buffer = (uint8_t *) mmap(NULL, this->full_size - PAGE_SIZE, 
-                readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
-                MAP_SHARED, this->dma_buf_fd, 0
-            );
-            if (this->_buffer == MAP_FAILED) {
-                std::cerr << "dma_buff mmap body_mem failed, fd: " << this->dma_buf_fd << "\n";
-                raise(SIGSEGV);
-            }
+        this->_buffer = (uint8_t *) mmap(NULL, this->_size, 
+            readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
+            MAP_SHARED, this->dma_buf_fd, 0
+        );
+        if (this->_buffer == MAP_FAILED) {
+            std::cerr << "dma_buff mmap body_mem failed, fd: " << this->dma_buf_fd << "\n";
+            raise(SIGSEGV);
         }
     }
     
     void DMABuffer::unmap() {
-        if (this->_header != nullptr) {
-            munmap(this->_header, PAGE_SIZE);
-        }
-        this->_header = nullptr;
         if (this->_buffer != nullptr) {
-            munmap(this->_buffer, this->full_size - PAGE_SIZE);
+            munmap(this->_buffer, this->_size);
         }
         this->_buffer = nullptr;
-    }
-
-    void DMABuffer::create_file() {
-        this->file_association_path = std::filesystem::path(this->file_association_folder);
-
-        if (!std::filesystem::exists(this->file_association_path) or !std::filesystem::is_directory(this->file_association_path)) {
-            std::filesystem::create_directories(this->file_association_path);
-        }
-
-        std::string buffer_name = DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->pid) +
-                DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->dma_buf_fd) + 
-                DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->buffer_index) + 
-                DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->buffer_index_max);
-        this->file_association_path = this->file_association_path / buffer_name;
-
-        std::ofstream {this->file_association_path};
-    }
-
-    void DMABuffer::delete_file() {
-        if (this->file_association_folder.length() > 0) {
-            std::filesystem::remove(this->file_association_path);
-            this->file_association_folder = "";
-        }
     }
 
     int DMABuffer::fd() {
@@ -233,15 +168,11 @@ namespace dps {
     }
 
     size_t DMABuffer::size() {
-        return this->_header->size;
+        return this->_size;
     }
 
     uint8_t * DMABuffer::buffer() {
         return this->_buffer;
-    }
-
-    dma_buffer_header * DMABuffer::header() {
-        return this->_header;
     }
 
     std::string DMABuffer::get_heap_name() {

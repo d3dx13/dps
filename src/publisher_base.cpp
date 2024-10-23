@@ -8,13 +8,12 @@ namespace dps {
         dps_common::unleash();
         
         // Create topic_path in filesystem
-        this->topic_path = std::filesystem::path(DPS_BASE_PATH) / (DPS_TOPIC_SERVICE_CHARACER + std::string(DPS_TOPIC_PATH)) / this->topic_name;
+        this->topic_path = std::filesystem::path(DPS_BASE_PATH) / this->topic_name;
         
         // Create DMABuffer array
         this->dma_buffers.resize(this->queue_size);
         for (int queue_id = 0; queue_id < this->queue_size; queue_id++) {
-            this->dma_buffers[queue_id] = std::make_unique<dps::DMABuffer>(this->message_size, this->heap_name, this->topic_name, 
-                this->topic_path / (DPS_TOPIC_SERVICE_CHARACER + std::string(DPS_PUB_PATH)), queue_id, this->queue_size);
+            this->dma_buffers[queue_id] = std::make_unique<dps::DMABuffer>(this->message_size, this->heap_name, this->topic_name);
         }
 
         // TODO add EventFD create
@@ -22,7 +21,7 @@ namespace dps {
         // TODO remove
         for (int queue_id = 0; queue_id < this->dma_buffers.size(); queue_id++) {
             std::cout << "fd: " << this->dma_buffers[queue_id].get()->fd();
-            std::cout << ", msg_id: " << this->dma_buffers[queue_id].get()->header()->msg_id << "\n";
+            std::cout << ", size: " << this->dma_buffers[queue_id].get()->size() << "\n";
         }
     }
 

@@ -21,14 +21,11 @@
 #include <sys/syscall.h>
 
 #define RLIMIT_NOFILE_MAX 1048576
-#define PAGE_SIZE 4096
 #define DMA_HEAP_PATH "/dev/dma_heap/"
 
 #define DPS_BASE_PATH "/dev/shm/.dps/"
 #define DPS_SUB_PATH "sub"
 #define DPS_PUB_PATH "pub"
-#define DPS_TOPIC_PATH "topic"
-#define DPS_NODE_PATH "node"
 
 #define DPS_TOPIC_SERVICE_CHARACER '\\'
 
