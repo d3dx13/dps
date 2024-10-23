@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     int temp;
     cout << "pid: " << getpid() << "\n";
-    system("rm -rf /dev/shm/.dps/test/pub/lol/*");
+    system("rm -rf /dev/shm/.dps/*");
     system("tree -a /dev/shm/");
 
     dps::PublisherBase pub("////test/\\/\\/\\pu\\b\\///lol///",
