@@ -10,7 +10,8 @@ set(CMAKE_CXX_FLAGS "-O3")
 
 #Generate the shared library from the library sources
 
-set(SHARED_CPP_FILES 
+set(SHARED_CPP_FILES
+    src/event.cpp
     src/dma_buffer.cpp
     src/publisher_base.cpp
 )
@@ -19,14 +20,14 @@ set(SHARED_CPP_FILES
 #     src/dma_proxy.cpp
 # )
 
-add_library(dps SHARED 
+add_library(dps SHARED
     ${SHARED_CPP_FILES}
     ${SRC_CPP_FILES}
 )
 
 target_include_directories(dps
-    PUBLIC 
-        ${PROJECT_SOURCE_DIR}/include
+    PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
 )
 
 # The executable code is here

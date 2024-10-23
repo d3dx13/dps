@@ -17,16 +17,17 @@ int main(int argc, char *argv[])
 
     dps::DMABuffer dma(pid, fd);
     cout << "Size: " << dma.size() << "\n";
-    for (int i = 0; i < dma.size(); i++){
-        cout << (int) dma.buffer()[i] << ", ";
+    for (int i = 0; i < dma.size(); i++)
+    {
+        cout << (int)dma.buffer()[i] << ", ";
     }
     cout << "\n";
-    
+
     system(("cat /proc/" + to_string(getpid()) + "/fdinfo/*").c_str());
 
     cin >> temp;
 
     // raise(SIGSEGV);
-    
+
     return 0;
 }

@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     int epfd;
     struct epoll_event ev;
     struct epoll_event evlist[1024];
-    
+
     system(("cat /proc/" + to_string(getpid()) + "/fdinfo/*").c_str());
 
     epfd = epoll_create1(0);
@@ -53,6 +53,6 @@ int main(int argc, char *argv[])
     cin >> temp;
 
     // raise(SIGSEGV);
-    
+
     return 0;
 }

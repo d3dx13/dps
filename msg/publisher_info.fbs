@@ -7,7 +7,7 @@ struct TimeStamp {
 
 table PublisherInfo {
   queue_size:ulong;
-  buffer_size:ulong;
+  message_size:ulong;
   pid:uint;
   event_fd:int = -1; // -1 : not initialized
   dma_buff_fd:[int];
@@ -20,7 +20,7 @@ table PublisherInfo {
   last_index:int = -1;
   index_cycle_pool:[int];
   timestamp_pool:[TimeStamp]; // publication time, needed to obtain time-relevant value in case of multiple publishers
-  msg_id_pool:[TimeStamp]; // message id, needed for synchronization in case of multi-subscription
+  msg_id_pool:[ulong]; // message id, needed for synchronization in case of multi-subscription
 }
 
 root_type PublisherInfo;

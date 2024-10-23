@@ -46,17 +46,17 @@ FLATBUFFERS_STRUCT_END(TimeStamp, 16);
 struct PublisherInfoT : public flatbuffers::NativeTable {
   typedef PublisherInfo TableType;
   uint64_t queue_size;
-  uint64_t buffer_size;
+  uint64_t message_size;
   uint32_t pid;
   int32_t event_fd;
   std::vector<int32_t> dma_buff_fd;
   int32_t last_index;
   std::vector<int32_t> index_cycle_pool;
   std::vector<dps_msg::TimeStamp> timestamp_pool;
-  std::vector<dps_msg::TimeStamp> msg_id_pool;
+  std::vector<uint64_t> msg_id_pool;
   PublisherInfoT()
       : queue_size(0),
-        buffer_size(0),
+        message_size(0),
         pid(0),
         event_fd(-1),
         last_index(-1) {
@@ -68,7 +68,7 @@ struct PublisherInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef PublisherInfoBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_QUEUE_SIZE = 4,
-    VT_BUFFER_SIZE = 6,
+    VT_MESSAGE_SIZE = 6,
     VT_PID = 8,
     VT_EVENT_FD = 10,
     VT_DMA_BUFF_FD = 12,
@@ -83,11 +83,11 @@ struct PublisherInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_queue_size(uint64_t _queue_size) {
     return SetField<uint64_t>(VT_QUEUE_SIZE, _queue_size, 0);
   }
-  uint64_t buffer_size() const {
-    return GetField<uint64_t>(VT_BUFFER_SIZE, 0);
+  uint64_t message_size() const {
+    return GetField<uint64_t>(VT_MESSAGE_SIZE, 0);
   }
-  bool mutate_buffer_size(uint64_t _buffer_size) {
-    return SetField<uint64_t>(VT_BUFFER_SIZE, _buffer_size, 0);
+  bool mutate_message_size(uint64_t _message_size) {
+    return SetField<uint64_t>(VT_MESSAGE_SIZE, _message_size, 0);
   }
   uint32_t pid() const {
     return GetField<uint32_t>(VT_PID, 0);
@@ -125,16 +125,16 @@ struct PublisherInfo FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<const dps_msg::TimeStamp *> *mutable_timestamp_pool() {
     return GetPointer<flatbuffers::Vector<const dps_msg::TimeStamp *> *>(VT_TIMESTAMP_POOL);
   }
-  const flatbuffers::Vector<const dps_msg::TimeStamp *> *msg_id_pool() const {
-    return GetPointer<const flatbuffers::Vector<const dps_msg::TimeStamp *> *>(VT_MSG_ID_POOL);
+  const flatbuffers::Vector<uint64_t> *msg_id_pool() const {
+    return GetPointer<const flatbuffers::Vector<uint64_t> *>(VT_MSG_ID_POOL);
   }
-  flatbuffers::Vector<const dps_msg::TimeStamp *> *mutable_msg_id_pool() {
-    return GetPointer<flatbuffers::Vector<const dps_msg::TimeStamp *> *>(VT_MSG_ID_POOL);
+  flatbuffers::Vector<uint64_t> *mutable_msg_id_pool() {
+    return GetPointer<flatbuffers::Vector<uint64_t> *>(VT_MSG_ID_POOL);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint64_t>(verifier, VT_QUEUE_SIZE) &&
-           VerifyField<uint64_t>(verifier, VT_BUFFER_SIZE) &&
+           VerifyField<uint64_t>(verifier, VT_MESSAGE_SIZE) &&
            VerifyField<uint32_t>(verifier, VT_PID) &&
            VerifyField<int32_t>(verifier, VT_EVENT_FD) &&
            VerifyOffset(verifier, VT_DMA_BUFF_FD) &&
@@ -160,8 +160,8 @@ struct PublisherInfoBuilder {
   void add_queue_size(uint64_t queue_size) {
     fbb_.AddElement<uint64_t>(PublisherInfo::VT_QUEUE_SIZE, queue_size, 0);
   }
-  void add_buffer_size(uint64_t buffer_size) {
-    fbb_.AddElement<uint64_t>(PublisherInfo::VT_BUFFER_SIZE, buffer_size, 0);
+  void add_message_size(uint64_t message_size) {
+    fbb_.AddElement<uint64_t>(PublisherInfo::VT_MESSAGE_SIZE, message_size, 0);
   }
   void add_pid(uint32_t pid) {
     fbb_.AddElement<uint32_t>(PublisherInfo::VT_PID, pid, 0);
@@ -181,7 +181,7 @@ struct PublisherInfoBuilder {
   void add_timestamp_pool(flatbuffers::Offset<flatbuffers::Vector<const dps_msg::TimeStamp *>> timestamp_pool) {
     fbb_.AddOffset(PublisherInfo::VT_TIMESTAMP_POOL, timestamp_pool);
   }
-  void add_msg_id_pool(flatbuffers::Offset<flatbuffers::Vector<const dps_msg::TimeStamp *>> msg_id_pool) {
+  void add_msg_id_pool(flatbuffers::Offset<flatbuffers::Vector<uint64_t>> msg_id_pool) {
     fbb_.AddOffset(PublisherInfo::VT_MSG_ID_POOL, msg_id_pool);
   }
   explicit PublisherInfoBuilder(flatbuffers::FlatBufferBuilder &_fbb)
@@ -198,16 +198,16 @@ struct PublisherInfoBuilder {
 inline flatbuffers::Offset<PublisherInfo> CreatePublisherInfo(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint64_t queue_size = 0,
-    uint64_t buffer_size = 0,
+    uint64_t message_size = 0,
     uint32_t pid = 0,
     int32_t event_fd = -1,
     flatbuffers::Offset<flatbuffers::Vector<int32_t>> dma_buff_fd = 0,
     int32_t last_index = -1,
     flatbuffers::Offset<flatbuffers::Vector<int32_t>> index_cycle_pool = 0,
     flatbuffers::Offset<flatbuffers::Vector<const dps_msg::TimeStamp *>> timestamp_pool = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const dps_msg::TimeStamp *>> msg_id_pool = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<uint64_t>> msg_id_pool = 0) {
   PublisherInfoBuilder builder_(_fbb);
-  builder_.add_buffer_size(buffer_size);
+  builder_.add_message_size(message_size);
   builder_.add_queue_size(queue_size);
   builder_.add_msg_id_pool(msg_id_pool);
   builder_.add_timestamp_pool(timestamp_pool);
@@ -222,22 +222,22 @@ inline flatbuffers::Offset<PublisherInfo> CreatePublisherInfo(
 inline flatbuffers::Offset<PublisherInfo> CreatePublisherInfoDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint64_t queue_size = 0,
-    uint64_t buffer_size = 0,
+    uint64_t message_size = 0,
     uint32_t pid = 0,
     int32_t event_fd = -1,
     const std::vector<int32_t> *dma_buff_fd = nullptr,
     int32_t last_index = -1,
     const std::vector<int32_t> *index_cycle_pool = nullptr,
     const std::vector<dps_msg::TimeStamp> *timestamp_pool = nullptr,
-    const std::vector<dps_msg::TimeStamp> *msg_id_pool = nullptr) {
+    const std::vector<uint64_t> *msg_id_pool = nullptr) {
   auto dma_buff_fd__ = dma_buff_fd ? _fbb.CreateVector<int32_t>(*dma_buff_fd) : 0;
   auto index_cycle_pool__ = index_cycle_pool ? _fbb.CreateVector<int32_t>(*index_cycle_pool) : 0;
   auto timestamp_pool__ = timestamp_pool ? _fbb.CreateVectorOfStructs<dps_msg::TimeStamp>(*timestamp_pool) : 0;
-  auto msg_id_pool__ = msg_id_pool ? _fbb.CreateVectorOfStructs<dps_msg::TimeStamp>(*msg_id_pool) : 0;
+  auto msg_id_pool__ = msg_id_pool ? _fbb.CreateVector<uint64_t>(*msg_id_pool) : 0;
   return dps_msg::CreatePublisherInfo(
       _fbb,
       queue_size,
-      buffer_size,
+      message_size,
       pid,
       event_fd,
       dma_buff_fd__,
@@ -259,14 +259,14 @@ inline void PublisherInfo::UnPackTo(PublisherInfoT *_o, const flatbuffers::resol
   (void)_o;
   (void)_resolver;
   { auto _e = queue_size(); _o->queue_size = _e; }
-  { auto _e = buffer_size(); _o->buffer_size = _e; }
+  { auto _e = message_size(); _o->message_size = _e; }
   { auto _e = pid(); _o->pid = _e; }
   { auto _e = event_fd(); _o->event_fd = _e; }
   { auto _e = dma_buff_fd(); if (_e) { _o->dma_buff_fd.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->dma_buff_fd[_i] = _e->Get(_i); } } }
   { auto _e = last_index(); _o->last_index = _e; }
   { auto _e = index_cycle_pool(); if (_e) { _o->index_cycle_pool.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->index_cycle_pool[_i] = _e->Get(_i); } } }
   { auto _e = timestamp_pool(); if (_e) { _o->timestamp_pool.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->timestamp_pool[_i] = *_e->Get(_i); } } }
-  { auto _e = msg_id_pool(); if (_e) { _o->msg_id_pool.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->msg_id_pool[_i] = *_e->Get(_i); } } }
+  { auto _e = msg_id_pool(); if (_e) { _o->msg_id_pool.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->msg_id_pool[_i] = _e->Get(_i); } } }
 }
 
 inline flatbuffers::Offset<PublisherInfo> PublisherInfo::Pack(flatbuffers::FlatBufferBuilder &_fbb, const PublisherInfoT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -278,18 +278,18 @@ inline flatbuffers::Offset<PublisherInfo> CreatePublisherInfo(flatbuffers::FlatB
   (void)_o;
   struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const PublisherInfoT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _queue_size = _o->queue_size;
-  auto _buffer_size = _o->buffer_size;
+  auto _message_size = _o->message_size;
   auto _pid = _o->pid;
   auto _event_fd = _o->event_fd;
   auto _dma_buff_fd = _o->dma_buff_fd.size() ? _fbb.CreateVector(_o->dma_buff_fd) : 0;
   auto _last_index = _o->last_index;
   auto _index_cycle_pool = _o->index_cycle_pool.size() ? _fbb.CreateVector(_o->index_cycle_pool) : 0;
   auto _timestamp_pool = _o->timestamp_pool.size() ? _fbb.CreateVectorOfStructs(_o->timestamp_pool) : 0;
-  auto _msg_id_pool = _o->msg_id_pool.size() ? _fbb.CreateVectorOfStructs(_o->msg_id_pool) : 0;
+  auto _msg_id_pool = _o->msg_id_pool.size() ? _fbb.CreateVector(_o->msg_id_pool) : 0;
   return dps_msg::CreatePublisherInfo(
       _fbb,
       _queue_size,
-      _buffer_size,
+      _message_size,
       _pid,
       _event_fd,
       _dma_buff_fd,

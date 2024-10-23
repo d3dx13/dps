@@ -1,21 +1,24 @@
 #include "dps/core/common.h"
 
-namespace dps {
+namespace dps
+{
     template <typename MessageT>
-    class Publisher {
-        private:
-            int queue;
+    class Publisher
+    {
+    private:
+        int queue;
 
-        public:
-            std::unique_ptr<MessageT> msg;
+    public:
+        std::unique_ptr<MessageT> msg;
 
-            Publisher(int queue);
+        Publisher(int queue);
 
-            void publish();
-            void print();
+        void publish();
+        void print();
     };
 
-    template <typename MessageT> Publisher<MessageT>::Publisher(int queue)
+    template <typename MessageT>
+    Publisher<MessageT>::Publisher(int queue)
     {
         this->queue = queue;
 
@@ -23,7 +26,7 @@ namespace dps {
 
         /*
         this->message_pool = std::make_unique<MessageT>[this->queue];
-        
+
         for (int i = 0; i < this->queue; i++){
             *(this->message_pool + i) = std::make_unique<MessageT>();
         }
@@ -32,12 +35,14 @@ namespace dps {
         this->msg = std::make_unique<MessageT>();
     }
 
-    template <typename MessageT> void Publisher<MessageT>::publish()
+    template <typename MessageT>
+    void Publisher<MessageT>::publish()
     {
         this->msg = std::make_unique<MessageT>();
     }
 
-    template <typename MessageT> void Publisher<MessageT>::print()
+    template <typename MessageT>
+    void Publisher<MessageT>::print()
     {
         std::cout << "this->queue = " << this->queue << "\n";
         std::cout << "this->msg->a = " << this->msg->a << "\n";

@@ -3,39 +3,39 @@
 
 #include "dps/core/common.h"
 
-namespace dps {
-    class DMABuffer {
-        public:
-            DMABuffer(size_t size, std::string heap_name, std::string buffer_name);
-            DMABuffer(int pid, int fd, bool readonly);
-            DMABuffer(int pid, int fd);
-            ~DMABuffer();
-            
-            int fd();
-            size_t size();
-            uint8_t * buffer();
+namespace dps
+{
+    class DMABuffer
+    {
+    public:
+        DMABuffer(size_t size, std::string heap_name, std::string buffer_name);
+        DMABuffer(int pid, int fd, bool readonly);
+        DMABuffer(int pid, int fd);
+        ~DMABuffer();
 
-            std::string get_heap_name();
-            std::string get_buffer_name();
-        
-        protected:
-            void allocate(size_t size, std::string heap_name, std::string buffer_name);
-            void connect(int pid, int fd);
+        int fd();
+        size_t size();
+        uint8_t *buffer();
 
-            void map(bool readonly);
-            void unmap();
+        std::string get_heap_name();
+        std::string get_buffer_name();
 
-            size_t _size;
+    protected:
+        void allocate(size_t size, std::string heap_name, std::string buffer_name);
+        void connect(int pid, int fd);
 
-            std::string heap_name;
-            std::string buffer_name;
+        void map(bool readonly);
+        void unmap();
 
-            int dma_buf_fd = -1;
-            uint8_t * _buffer;
+        size_t _size;
 
-            void update_buffer_info();
+        std::string heap_name;
+        std::string buffer_name;
 
-            const int pid = getpid();
+        int dma_buf_fd = -1;
+        uint8_t *_buffer;
+
+        void update_buffer_info();
     };
 }
 

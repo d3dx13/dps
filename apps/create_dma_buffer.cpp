@@ -15,11 +15,13 @@ int main(int argc, char *argv[])
     cout << "pid " << getpid() << "\n";
     cout << "fd " << dma.fd() << "\n";
     cout << "\n";
-    for (int i = 0; i < 100; i++){
+    for (int i = 0; i < 100; i++)
+    {
         dma.buffer()[i] = (uint8_t)(200 - i);
     }
-    for (int i = 0; i < 100; i++){
-        cout << (int) dma.buffer()[i] << ", ";
+    for (int i = 0; i < 100; i++)
+    {
+        cout << (int)dma.buffer()[i] << ", ";
     }
 
     cin >> temp;
@@ -27,8 +29,8 @@ int main(int argc, char *argv[])
     system("tree -a /dev/shm/");
     dma.~DMABuffer();
     system("tree -a /dev/shm/");
-    
+
     // system(("cat /proc/" + to_string(getpid()) + "/fdinfo/*").c_str());
-    
+
     return 0;
 }

@@ -1,7 +1,7 @@
 #include "dps/dps.h"
 #include <iostream>
-#include <unistd.h>
 #include <signal.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -12,7 +12,8 @@ int main(int argc, char *argv[])
     system("rm -rf /dev/shm/.dps/*");
     system("tree -a /dev/shm/");
 
-    dps::PublisherBase pub("////test/\\/\\/\\pu\\b\\///lol///", 1000 * 1000 * 1000, 4, "system");
+    dps::PublisherBase pub("////test/\\/\\/\\pu\\b\\///lol///",
+                           1000 * 1000 * 1000, 4, "system");
     system("tree -a /dev/shm/");
 
     cin >> temp;
@@ -20,6 +21,6 @@ int main(int argc, char *argv[])
     system("tree -a /dev/shm/");
     pub.~PublisherBase();
     system("tree -a /dev/shm/");
-    
+
     return 0;
 }
