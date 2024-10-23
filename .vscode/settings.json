@@ -99,5 +99,8 @@
         "libuvc.h": "c",
         "time.h": "c",
         "stdint.h": "c"
-    }
+    },
+    "python.analysis.extraPaths": [
+        "./experiments/flatbuffers/build"
+    ]
 }
