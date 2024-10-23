@@ -9,11 +9,11 @@ int main(int argc, char *argv[])
 {
     int temp;
     cout << "pid: " << getpid() << "\n";
-    system("rm -rf /dev/shm/.dps/*");
+    system("rm -rf /dev/shm/.dps/test/pub/lol/*");
     system("tree -a /dev/shm/");
 
     dps::PublisherBase pub("////test/\\/\\/\\pu\\b\\///lol///",
-                           1000 * 1000 * 1000, 4, "system");
+                           1920 * 1080, 4, "system");
     system("tree -a /dev/shm/");
 
     cin >> temp;

@@ -9,6 +9,16 @@ sys.path.append(
 sys.path.append(
     "/home/d3dx13/workspace/dps/experiments/linux_proxy/build/lib.linux-x86_64-cpython-310"
 )
+sys.path.append(
+    "/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-x86_64-3.10"
+)
+sys.path.append(
+    "/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-aarch64-cpython-311"
+)
+sys.path.append(
+    "/home/d3dx13/workspace/ips/experiments/linux_proxy/build/lib.linux-x86_64-cpython-310"
+)
+
 
 import os
 from time import sleep, monotonic
@@ -65,11 +75,11 @@ event = select.epoll(sizehint=-1, flags=0)
 
 # mask = IN_DELETE | IN_CLOSE | IN_MODIFY
 # mask = IN_CREATE | IN_DELETE | IN_OPEN | IN_CLOSE | IN_MODIFY
-mask = IN_CREATE | IN_DELETE
+mask = IN_CLOSE_WRITE | IN_DELETE | IN_DELETE_SELF
 
 fds = []
 paths = [
-    "/dev/shm/.dps/topic/image",
+    "/dev/shm/.dps/test/pub/lol",
 ]
 
 inotify_fd = linux_proxy.inotify_init1(IN_NONBLOCK)
@@ -99,3 +109,5 @@ while True:
     temp = linux_proxy.inotify_event_read(inotify_fd)
     if temp > 0:
         print("HALP", temp)
+    elif temp < 0:
+        break

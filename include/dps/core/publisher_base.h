@@ -17,15 +17,18 @@ namespace dps
 
     protected:
         void init_topic_path();
-        std::vector<uint8_t> generate_publisher_info_serialized(size_t message_size, size_t queue_size);
+        void create_publisher_info(size_t message_size, size_t queue_size);
 
         const std::string topic_name;
         const std::string heap_name;
 
         std::filesystem::path topic_path;
+        std::filesystem::path publisher_info_file_path;
 
-        std::vector<std::unique_ptr<dps::DMABuffer>> dma_buffers;
         std::unique_ptr<dps::Event> event;
-        // std::unique_ptr<dps::DMABuffer> event;
+        std::vector<std::unique_ptr<dps::DMABuffer>> dma_buffers;
+
+        std::unique_ptr<dps::DMABuffer> publisher_info_buffer;
+        dps_msg::PublisherInfo *publisher_info;
     };
 }

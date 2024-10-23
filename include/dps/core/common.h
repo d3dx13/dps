@@ -27,6 +27,7 @@
 #define DPS_BASE_PATH "/dev/shm/.dps/"
 #define DPS_SUB_PATH "sub"
 #define DPS_PUB_PATH "pub"
+#define DPS_FILE_PERMISSION 0000 // 0444
 
 #define DPS_TOPIC_SERVICE_CHARACER '\\'
 

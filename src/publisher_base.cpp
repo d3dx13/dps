@@ -23,27 +23,14 @@ namespace dps
         this->event = std::make_unique<dps::Event>();
 
         // Create PublisherInfo
-        std::vector<uint8_t> publisher_info_serialized =
-            this->generate_publisher_info_serialized(message_size, queue_size);
-
-        // TODo remove
-        std::cout << "Size: " << publisher_info_serialized.size() << "\n";
-        for (int i = 0; i < publisher_info_serialized.size(); i++)
-        {
-            std::cout << ", " << (unsigned int)publisher_info_serialized[i];
-        }
-        std::cout << "\n";
-
-        // TODO remove
-        for (int queue_id = 0; queue_id < this->dma_buffers.size(); queue_id++)
-        {
-            std::cout << "fd: " << this->dma_buffers[queue_id].get()->fd();
-            std::cout << ", size: " << this->dma_buffers[queue_id].get()->size()
-                      << "\n";
-        }
+        this->create_publisher_info(message_size, queue_size);
     }
 
-    PublisherBase::~PublisherBase() {}
+    PublisherBase::~PublisherBase()
+    {
+        // Delete file publisher_info_file_path -> generate inotify event IN_DELETE
+        remove(this->publisher_info_file_path.c_str());
+    }
 
     void PublisherBase::init_topic_path()
     {
@@ -56,8 +43,8 @@ namespace dps
         }
     }
 
-    std::vector<uint8_t> PublisherBase::generate_publisher_info_serialized(size_t message_size,
-                                                                           size_t queue_size)
+    void PublisherBase::create_publisher_info(size_t message_size,
+                                              size_t queue_size)
     {
         // temporary object
         dps_msg::PublisherInfoT publisher_info = dps_msg::PublisherInfoT();
@@ -87,7 +74,24 @@ namespace dps
         flatbuffers::FlatBufferBuilder fbb;
         fbb.Finish(dps_msg::PublisherInfo::Pack(fbb, &publisher_info));
 
-        return std::vector<uint8_t>(fbb.GetBufferPointer(),
-                                    fbb.GetBufferPointer() + fbb.GetSize());
+        // Fill dma_buf related to publisher_info
+        this->publisher_info_buffer = std::make_unique<dps::DMABuffer>(
+            fbb.GetSize(), this->heap_name, "info:" + this->topic_name);
+        for (int i = 0; i < fbb.GetSize(); i++)
+        {
+            this->publisher_info_buffer.get()->buffer()[i] = fbb.GetBufferPointer()[i];
+        }
+
+        // Create PublisherInfo on buffer
+        this->publisher_info = dps_msg::GetMutablePublisherInfo(this->publisher_info_buffer.get()->buffer());
+
+        // Create publisher_info_file_path
+        this->publisher_info_file_path = this->topic_path / ((DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->publisher_info->pid())) +
+                                                             (DPS_TOPIC_SERVICE_CHARACER + std::to_string(this->publisher_info_buffer.get()->fd())));
+
+        // Create file publisher_info_file_path -> generate inotify event IN_CLOSE_WRITE
+        int ublisher_info_file_fd;
+        ublisher_info_file_fd = open(this->publisher_info_file_path.c_str(), O_WRONLY | O_CREAT, DPS_FILE_PERMISSION);
+        close(ublisher_info_file_fd);
     }
 } // namespace dps
