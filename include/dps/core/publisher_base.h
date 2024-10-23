@@ -8,12 +8,12 @@ namespace dps
 {
     class PublisherBase
     {
-    public:
+    public: // TODO make protected? Only Node can give PublisherBase
         PublisherBase(std::string topic_name, size_t message_size, size_t queue_size, std::string heap_name);
 
         ~PublisherBase();
 
-        void publish();
+        void publish(); // TODO -> work with publisher_info
 
     protected:
         void init_topic_path();

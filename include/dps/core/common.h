@@ -24,6 +24,7 @@
 #define RLIMIT_NOFILE_MAX 1048576
 #define DMA_HEAP_PATH "/dev/dma_heap/"
 
+// TODO add DOMAIN as "/dev/shm/.dps/{DOMAIN}/{topic}"
 #define DPS_BASE_PATH "/dev/shm/.dps/"
 #define DPS_SUB_PATH "sub"
 #define DPS_PUB_PATH "pub"
