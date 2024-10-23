@@ -21,9 +21,9 @@ so the library is extremely low-level and its transport has no dependencies othe
 Включить камеру в /boot/firmware/config.txt:
 
 ```bash
-sudo apt-get install -y build-essential gdb cmake
+sudo apt install -y build-essential gdb cmake
 
-pip3 install posix-ipc
+sudo apt install -y flatbuffers-compiler libflatbuffers-dev
 ```
 
 https://docs.oracle.com/cd/E19476-01/821-0505/file-descriptor-requirements.html#:~:text=Linux%20systems%20limit%20the%20number,worker%20threads%20will%20be%20blocked.
