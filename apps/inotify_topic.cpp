@@ -7,10 +7,12 @@
 #include <iostream>
 #include <signal.h>
 #include <unistd.h>
+#include <dirent.h>
 
 using namespace std;
 
 #define EVENT_SIZE sizeof(struct inotify_event)
+#define USLEEP 100
 
 vector<string> paths = {
     "/dev/shm/.dps/test/pub/lol",
@@ -18,33 +20,47 @@ vector<string> paths = {
 
 unsigned int mask = IN_CLOSE_WRITE | IN_DELETE | IN_DELETE_SELF;
 
+struct dirent *de;
+struct stat sb;
+int watch_fd = -1;
 int inotify_fd = -1;
 
 int main(int argc, char *argv[])
 {
+    printf("inotify_fd = %d\n", inotify_fd);
+
 start:
-    close(inotify_fd);
 
-    vector<int> fds;
-    inotify_fd = inotify_init1(IN_NONBLOCK);
-
-    for (auto path : paths)
+    for (string path : paths)
     {
-        struct stat sb;
         if (stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
         {
             printf("YES %s\n", path.c_str());
+            inotify_fd = inotify_init1(IN_NONBLOCK);
+            watch_fd = inotify_add_watch(inotify_fd, path.c_str(), mask);
+
+            DIR *dr = opendir(path.c_str());
+            while ((de = readdir(dr)) != NULL)
+            {
+                if (!(de->d_name[0] == '.' || de->d_name[1] == '.'))
+                {
+                    printf("New File %s\n", de->d_name);
+                }
+            }
+            closedir(dr);
         }
         else
         {
-            // printf("NO %s\n", path.c_str());
-            usleep(100000);
+            if (inotify_fd > 0)
+            {
+                close(inotify_fd);
+                inotify_fd = -1;
+            }
+            usleep(USLEEP);
             goto start;
         }
-        fds.push_back(inotify_add_watch(inotify_fd, path.c_str(), mask));
     }
-
-    printf("inotify_fd = %d\n", inotify_fd);
+    printf("watch_fd = %d\n", watch_fd);
 
     while (true)
     {
@@ -52,7 +68,7 @@ start:
         ioctl(inotify_fd, FIONREAD, &n);
         if (n == 0)
         {
-            usleep(1000);
+            usleep(USLEEP);
             continue;
         }
         int length, i = 0, wd;
