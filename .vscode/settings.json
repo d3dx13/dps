@@ -99,6 +99,8 @@
         "unistd.h": "c",
         "libuvc.h": "c",
         "time.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "format": "cpp",
+        "text_encoding": "cpp"
     }
 }

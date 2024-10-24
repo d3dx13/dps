@@ -17,6 +17,13 @@ namespace dps
 
     DMABuffer::~DMABuffer()
     {
+        if (this->dma_buf_fd <= 0)
+        {
+            return;
+        }
+
+        printf("DELETE DMABuffer with fd: %d\n", this->fd()); // TODO remove
+
         /*
         Close dma_buff
         */

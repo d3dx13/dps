@@ -29,7 +29,20 @@ namespace dps
     PublisherBase::~PublisherBase()
     {
         // Delete file publisher_info_file_path -> generate inotify event IN_DELETE
+        std::cout << "Delete file publisher_info_file_path\n"; // TODO remove
+
         remove(this->publisher_info_file_path.c_str());
+
+        this->publisher_info_buffer.reset();
+        this->publisher_info = NULL;
+
+        for (auto it = this->dma_buffers.begin(); it != this->dma_buffers.end(); it++)
+        {
+            std::cout << "cleanup buffer\n"; // TODO remove
+            it->reset();
+        }
+
+        this->event.reset();
     }
 
     void PublisherBase::init_topic_path()
